@@ -29,4 +29,4 @@ urlpatterns = [
     path('filter-attendance/', views.filter_attendance, name='filter_attendance'),      # Фильтрация по полу и факультетам
     path('set-language/', views.set_language_view, name='set_language'),                # Выбор языка
      path('leaderboard/', leaderboard, name='leaderboard'),
-]
+]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

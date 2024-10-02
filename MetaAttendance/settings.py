@@ -90,6 +90,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://metaattendance-production.up.railway.app',  # Your production URL
 ]
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
