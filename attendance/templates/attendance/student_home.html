@@ -210,7 +210,12 @@
                 {% csrf_token %}
                 <button type="submit" class="btn text-lg font-semibold">Mark Attendance</button>
                 <a href="{% url 'leaderboard' %}" class="btn btn-secondary">Посмотреть таблицу лидеров по пропускам</a>
-                <a href="{% url 'profile' %}" class="btn btn-custom mb-2">Edit Profile</a>
+                <form method="post" action="{% url 'mark_attendance' %}" class="text-center mb-4">
+                    {% csrf_token %}
+                    <button type="submit" class="btn text-lg font-semibold">Mark Attendance</button>
+                    <a href="{% url 'leaderboard' %}" class="btn btn-secondary">Посмотреть таблицу лидеров по пропускам</a>
+                    <a href="{% url 'profile' %}" class="btn btn-custom mb-2">Edit Profile</a>
+                </form>
 
             </form>
 
