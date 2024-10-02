@@ -43,7 +43,10 @@ from django.db.models import Count, Q
 from geopy.distance import geodesic
 import requests
 import ipaddress
-@login_required
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import UserForm, ProfileForm
+
 def profile(request):
     user = request.user
     profile = user.profile if hasattr(user, 'profile') else None
@@ -51,7 +54,7 @@ def profile(request):
     if request.method == 'POST':
         user_form = UserForm(request.POST, instance=user)
         profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
-
+        
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
