@@ -1,0 +1,52 @@
+<!-- filter_attendance.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Фильтрация посещаемости</title>
+</head>
+<body>
+    <h1>Фильтрация посещаемости</h1>
+
+    <form method="get">
+        <label for="gender">Пол:</label>
+        <select name="gender" id="gender">
+            <option value="">Все</option>
+            <option value="male" {% if selected_gender == "male" %}selected{% endif %}>Мужской</option>
+            <option value="female" {% if selected_gender == "female" %}selected{% endif %}>Женский</option>
+        </select>
+
+        <label for="faculty">Факультет:</label>
+        <select name="faculty" id="faculty">
+            <option value="">Все факультеты</option>
+            {% for faculty in faculties %}
+            <option value="{{ faculty.id }}" {% if selected_faculty == faculty.id %}selected{% endif %}>{{ faculty.name }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Применить фильтр</button>
+    </form>
+
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Имя студента</th>
+                <th>Факультет</th>
+                <th>Статус посещаемости</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attendance in attendance_records %}
+            <tr>
+                <td>{{ attendance.user.student.user.username }}</td>
+                <td>{{ attendance.user.student.faculty.name }}</td>
+                <td>{{ attendance.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'admin_dashboard' %}">Назад к панели администратора</a>
+</body>
+</html>

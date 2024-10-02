@@ -1,0 +1,124 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}Add Student{% endblock %}
+
+{% block content %}
+<div class="add-student-container">
+    <h2>Add New Student</h2>
+    <form method="post" class="student-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <input type="text" class="form-control" id="username" name="username" required>
+            <label for="username">Username</label>
+        </div>
+        <div class="form-group">
+            <input type="password" class="form-control" id="password" name="password" required>
+            <label for="password">Password</label>
+        </div>
+        <div class="form-group">
+            <select class="form-control" id="faculty" name="faculty" required>
+                <option value="" selected disabled></option>
+                {% for faculty in faculties %}
+                    <option value="{{ faculty.id }}">{{ faculty.name }}</option>
+                {% endfor %}
+            </select>
+            <label for="faculty">Faculty</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Student</button>
+    </form>
+</div>
+
+<style>
+    body {
+        background-color: #ffeeee;
+        font-family: Arial, sans-serif;
+    }
+
+    .add-student-container {
+        max-width: 400px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(255, 0, 0, 0.1);
+        border: 2px solid #ff3333;
+    }
+
+    h2 {
+        color: #cc0000;
+        font-size: 1.8rem;
+        margin-bottom: 2rem;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .student-form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.8rem;
+        border: none;
+        border-bottom: 2px solid #ffcccc;
+        font-size: 1rem;
+        transition: all 0.3s;
+        background-color: transparent;
+        color: #cc0000;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #ff3333;
+    }
+
+    .form-group label {
+        position: absolute;
+        top: 0.8rem;
+        left: 0.8rem;
+        font-size: 1rem;
+        color: #ff6666;
+        pointer-events: none;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus + label,
+    .form-control:not(:placeholder-shown) + label {
+        top: -0.5rem;
+        font-size: 0.8rem;
+        color: #ff3333;
+    }
+
+    select.form-control {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ff3333' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.8rem center;
+    }
+
+    .btn-primary {
+        background-color: #ff3333;
+        border: none;
+        padding: 0.8rem;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.3s;
+        font-weight: bold;
+    }
+
+    .btn-primary:hover {
+        background-color: #cc0000;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(255, 0, 0, 0.3);
+    }
+</style>
+{% endblock %}

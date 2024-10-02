@@ -1,0 +1,30 @@
+<!-- attendance_by_hour.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Статистика посещаемости по часам</title>
+</head>
+<body>
+    <h1>Статистика посещаемости по часам</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Час</th>
+                <th>Количество посещений</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in attendance_by_hour %}
+            <tr>
+                <td>{{ record.hour|date:"H:i" }}</td>
+                <td>{{ record.count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <a href="{% url 'admin_dashboard' %}">Назад к панели администратора</a>
+</body>
+</html>

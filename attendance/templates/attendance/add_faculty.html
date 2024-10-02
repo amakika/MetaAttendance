@@ -1,0 +1,101 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}Add Faculty{% endblock %}
+
+{% block content %}
+<div class="add-faculty-container">
+    <h2>Add Faculty</h2>
+    <form method="post" class="faculty-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <input type="text" class="form-control" id="name" name="name" required>
+            <label for="name">Faculty Name</label>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Faculty</button>
+    </form>
+</div>
+
+<style>
+    body {
+        background-color: #fff5f5;
+    }
+
+    .add-faculty-container {
+        max-width: 400px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(255, 0, 0, 0.1);
+        border: 2px solid #ff6666;
+    }
+
+    h2 {
+        color: #cc0000;
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        font-weight: bold;
+    }
+
+    .faculty-form {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.8rem;
+        border: none;
+        border-bottom: 2px solid #ffcccc;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+        background-color: transparent;
+        color: #cc0000;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #ff3333;
+    }
+
+    .form-group label {
+        position: absolute;
+        top: 0.8rem;
+        left: 0.8rem;
+        font-size: 1rem;
+        color: #ff6666;
+        pointer-events: none;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus + label,
+    .form-control:not(:placeholder-shown) + label {
+        top: -0.5rem;
+        font-size: 0.8rem;
+        color: #ff3333;
+    }
+
+    .btn-primary {
+        background-color: #ff3333;
+        border: none;
+        padding: 0.8rem;
+        color: white;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.3s;
+        font-weight: bold;
+    }
+
+    .btn-primary:hover {
+        background-color: #cc0000;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(255, 0, 0, 0.3);
+    }
+</style>
+{% endblock %}

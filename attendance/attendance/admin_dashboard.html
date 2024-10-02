@@ -1,0 +1,264 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --primary-color: #e63946;
+        --secondary-color: #a8dadc;
+        --background-color: #f1faee;
+        --text-color: #1d3557;
+        --shadow-color: #d1d9e6;
+        --highlight-color: #ffffff;
+    }
+
+    .dark-mode {
+        --primary-color: #ff6b6b;
+        --secondary-color: #4ecdc4;
+        --background-color: #1a1a1a;
+        --text-color: #f0f0f0;
+        --shadow-color: #0d0d0d;
+        --highlight-color: #2c2c2c;
+    }
+
+    body {
+        background-color: var(--background-color);
+        color: var(--text-color);
+        transition: all 0.3s ease;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .dashboard-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 30px;
+        position: relative;
+        background-color: var(--background-color);
+        border-radius: 20px;
+        box-shadow: 10px 10px 20px var(--shadow-color), 
+                    -10px -10px 20px var(--highlight-color);
+        transition: all 0.3s ease;
+    }
+
+    h2 {
+        color: var(--primary-color);
+        margin-bottom: 30px;
+        text-align: center;
+        font-weight: 600;
+        position: relative;
+    }
+
+    h2::after {
+        content: "";
+        display: block;
+        width: 100px;
+        height: 3px;
+        background: linear-gradient(to right, var(--primary-color), transparent);
+        margin: 10px auto;
+    }
+
+    h3 {
+        color: var(--text-color);
+        margin-top: 30px;
+        margin-bottom: 20px;
+        position: relative;
+        padding-left: 25px;
+        font-weight: 500;
+    }
+
+    h3::before {
+        content: "❧";
+        position: absolute;
+        left: 0;
+        color: var(--primary-color);
+    }
+
+    .list-group-item {
+        background-color: var(--background-color);
+        border: none;
+        margin-bottom: 15px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 5px 5px 10px var(--shadow-color), 
+                    -5px -5px 10px var(--highlight-color);
+    }
+
+    .list-group-item:hover {
+        transform: translateY(-5px);
+        box-shadow: 8px 8px 15px var(--shadow-color), 
+                    -8px -8px 15px var(--highlight-color);
+    }
+
+    .list-group-item a {
+        color: var(--text-color);
+        text-decoration: none;
+        display: block;
+        padding: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 40px;
+        flex-wrap: wrap;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border: none;
+        padding: 12px 25px;
+        border-radius: 50px;
+        color: var(--highlight-color);
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin: 10px 0;
+        box-shadow: 5px 5px 10px var(--shadow-color), 
+                    -5px -5px 10px var(--highlight-color);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 8px 8px 15px var(--shadow-color), 
+                    -8px -8px 15px var(--highlight-color);
+        background-color: #d62839;
+    }
+
+    .dark-mode-toggle {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background-color: var(--background-color);
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 5px 5px 10px var(--shadow-color), 
+                    -5px -5px 10px var(--highlight-color);
+        transition: all 0.3s ease;
+    }
+
+    .dark-mode-toggle:hover {
+        transform: scale(1.1);
+    }
+
+    .dark-mode-toggle i {
+        font-size: 24px;
+        color: var(--primary-color);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .list-group-item {
+        animation: fadeIn 0.5s ease forwards;
+        opacity: 0;
+    }
+
+    .list-group-item:nth-child(1) { animation-delay: 0.1s; }
+    .list-group-item:nth-child(2) { animation-delay: 0.2s; }
+    .list-group-item:nth-child(3) { animation-delay: 0.3s; }
+    .list-group-item:nth-child(4) { animation-delay: 0.4s; }
+    .list-group-item:nth-child(5) { animation-delay: 0.5s; }
+
+    .stats-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+    }
+
+    .stat-card {
+        background-color: var(--background-color);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        flex: 1;
+        margin: 0 10px;
+        box-shadow: 5px 5px 10px var(--shadow-color), 
+                    -5px -5px 10px var(--highlight-color);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-card h4 {
+        color: var(--primary-color);
+        margin-bottom: 10px;
+    }
+
+    .stat-card p {
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text-color);
+    }
+</style>
+
+<button class="dark-mode-toggle" onclick="toggleDarkMode()">
+    <i class="fas fa-moon"></i>
+</button>
+
+<div class="dashboard-container">
+    <h2>Admin Dashboard</h2>
+
+    <div class="stats-container">
+        <div class="stat-card">
+            <h4>Total Students</h4>
+            <p>{{ total_students }}</p>
+        </div>
+        <div class="stat-card">
+            <h4>Total Teachers</h4>
+            <p>{{ total_teachers }}</p>
+        </div>
+        <div class="stat-card">
+            <h4>Total Faculties</h4>
+            <p>{{ faculties.count }}</p>
+        </div>
+    </div>
+
+    <h3>Faculties</h3>
+    <ul class="list-group">
+        {% for faculty in faculties %}
+            <li class="list-group-item">
+                <a href="{% url 'faculty_attendance' faculty.id %}">{{ faculty.name }}</a>
+            </li>
+        {% empty %}
+            <li class="list-group-item">No faculties available</li>
+        {% endfor %}
+    </ul>
+    <div class="btn-container">
+        <a href="{% url 'add_student' %}" class="btn btn-primary">Add Student</a>
+        <a href="{% url 'add_teacher' %}" class="btn btn-primary">Add Teacher</a>
+        <a href="{% url 'add_faculty' %}" class="btn btn-primary">Add Faculty</a>
+    </div>
+</div>
+
+<script>
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        const icon = document.querySelector('.dark-mode-toggle i');
+        if (document.body.classList.contains('dark-mode')) {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        } else {
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const listItems = document.querySelectorAll('.list-group-item');
+        listItems.forEach((item, index) => {
+            item.style.animationDelay = `${0.1 * (index + 1)}s`;
+        });
+    });
+</script>
+{% endblock %}

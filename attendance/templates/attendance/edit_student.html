@@ -1,0 +1,29 @@
+<!-- attendance/templates/attendance/edit_student.html -->
+{% extends 'attendance/base.html' %}
+
+{% block title %}Edit Student{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+  <div class="neumorphic p-4">
+    <h2 class="text-2xl font-bold mb-4">Edit Student: {{ student.user.username }}</h2>
+    <form method="post" action="{% url 'edit_student' student.id %}">
+      {% csrf_token %}
+      <div class="mb-4">
+        <label for="username" class="block text-sm font-medium text-gray-700">Username:</label>
+        <input type="text" id="username" name="username" value="{{ student.user.username }}" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+      </div>
+      <div class="mb-4">
+        <label for="faculty" class="block text-sm font-medium text-gray-700">Faculty:</label>
+        <select id="faculty" name="faculty" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+          {% for faculty in faculties %}
+          <option value="{{ faculty.id }}" {{ faculty.id == student.faculty.id | yesno:"selected,"}}>{{ faculty.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary">Update</button>
+      <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary ml-2">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

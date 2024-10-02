@@ -1,0 +1,111 @@
+{% extends 'attendance/base.html' %}
+
+{% block title %}Add Teacher{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card kyrgyz-border">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="mb-0">Add Teacher</h2>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="username" class="form-label">Username:</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Password:</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                        </div>
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} mt-3">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                        <button type="submit" class="btn btn-danger btn-lg w-100">
+                            <i class="fas fa-plus-circle me-2"></i>Add Teacher
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #dc3545;
+        --secondary-color: #ff6b6b;
+        --light-color: #ffeeee;
+    }
+
+    body {
+        background-color: var(--light-color);
+    }
+
+    .card {
+        box-shadow: 0 0 20px rgba(220,53,69,0.2);
+        border: none;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        background-color: var(--primary-color) !important;
+        border-bottom: 2px solid var(--secondary-color);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--primary-color);
+    }
+
+    .input-group-text {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+    }
+
+    .form-control {
+        border: 2px solid var(--secondary-color);
+    }
+
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(220,53,69,0.25);
+    }
+
+    .btn-danger {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .btn-danger:hover {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+        color: white;
+    }
+
+    .kyrgyz-border {
+        border: 2px solid var(--secondary-color);
+        border-radius: 15px;
+    }
+
+    .alert {
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
