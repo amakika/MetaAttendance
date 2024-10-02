@@ -235,16 +235,26 @@
         {% endfor %}
     </ul>
     <div class="btn-container">
-        <a href="{% url 'add_student' %}" class="btn btn-primary">Add Student</a>
-        <a href="{% url 'add_teacher' %}" class="btn btn-primary">Add Teacher</a>
-        <a href="{% url 'add_faculty' %}" class="btn btn-primary">Add Faculty</a>
+        <form method="post" action="{% url 'add_student' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Add Student</button>
+        </form>
+    
+        <form method="post" action="{% url 'add_teacher' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Add Teacher</button>
+        </form>
+    
+        <form method="post" action="{% url 'add_faculty' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Add Faculty</button>
+        </form>
+    
         <a href="{% url 'all_teachers' %}" class="btn btn-secondary">All Teachers</a>
-        
-     
-      
         <a href="{% url 'attendance_by_hour' %}" class="btn btn-secondary">Attendance by Hour</a>
         <a href="{% url 'filter_attendance' %}" class="btn btn-secondary">Filter Attendance</a>
     </div>
+    
 </div>
 
 <script>

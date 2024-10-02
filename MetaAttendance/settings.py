@@ -39,6 +39,8 @@ ALLOWED_HOSTS = [
     'metaattendance-production.up.railway.app',
     # Add any other domains you need
 ]
+CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_HTTPONLY = True
 
 
 # Application definition
