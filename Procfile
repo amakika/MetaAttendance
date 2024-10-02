@@ -1,3 +1,4 @@
-web: gunicorn MetaAttendance.wsgi --log-file -
+web: gunicorn MetaAttendance.wsgi
+
 
 
