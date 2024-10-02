@@ -29,7 +29,12 @@ SECRET_KEY = 'django-insecure-a1js_6%6y-x9-cqj5pv5)u$(b5m=-1eg2@5!7#d7qyw0-g#d@u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'metaattendance-production.up.railway.app',
+    # Add any other domains you need
+]
 
 
 # Application definition
