@@ -29,7 +29,122 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.db.models import Count, Q
 from .models import Student, Teacher, Attendance, Faculty
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from .models import Student, Teacher, Attendance, Faculty, Profile
+from django.utils import timezone
+from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.urls import reverse
+from django.contrib.auth.models import User
+from .forms import UserForm, ProfileForm
+from django.db.models import Count, Q
+from geopy.distance import geodesic
+import requests
+import ipaddress
+def leaderboard(request):
+    # Получаем количество пропусков для каждого студента
+    student_leaderboard = Student.objects.annotate(
+        absent_days=Count('user__attendance', filter=Q(user__attendance__status='absent'))
+    ).order_by('-absent_days')
 
+    # Добавляем фильтрацию по факультетам и студентам
+    faculty_filter = request.GET.get('faculty', None)
+    student_filter = request.GET.get('student', None)
+
+    if faculty_filter:
+        student_leaderboard = student_leaderboard.filter(faculty__id=faculty_filter)
+
+    if student_filter:
+        student_leaderboard = student_leaderboard.filter(id=student_filter)
+
+    faculties = Faculty.objects.all()  # Получаем все факультеты для фильтрации
+    students = Student.objects.all()    # Получаем всех студентов для фильтрации
+
+    context = {
+        'student_leaderboard': student_leaderboard,
+        'faculties': faculties,
+        'students': students,
+    }
+    return render(request, 'attendance/leaderboard.html', context)
+# Профиль студента
+@login_required
+def profile(request):
+    user = request.user
+    profile = user.profile if hasattr(user, 'profile') else None
+
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=user)
+        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
+        
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Ваш профиль успешно обновлен!')
+            return redirect('profile')
+        else:
+            messages.error(request, 'Пожалуйста, исправьте ошибки ниже.')
+    else:
+        user_form = UserForm(instance=user)
+        profile_form = ProfileForm(instance=profile)
+
+    return render(request, 'attendance/profile.html', {
+        'user_form': user_form,
+        'profile_form': profile_form
+    })
+
+@login_required
+def mark_attendance(request):
+    if request.method == 'POST':
+        user_ip = request.META['REMOTE_ADDR']
+        try:
+            ipaddress.ip_address(user_ip)
+        except ValueError:
+            messages.error(request, 'Недействительный IP адрес.')
+            return redirect('home')
+
+        try:
+            response = requests.get(f'http://ip-api.com/json/{user_ip}').json()
+            if response['status'] == 'fail':
+                raise ValueError('Не удалось получить местоположение')
+            user_location = {'lat': response['lat'], 'lng': response['lon']}
+        except (requests.RequestException, ValueError, KeyError) as e:
+            messages.error(request, f'Ошибка получения местоположения: {e}')
+            return redirect('home')
+
+        college_location = {'lat': 42.85747034165005, 'lng': 74.59859944086045}
+        distance = calculate_distance(user_location, college_location)
+        if distance <= 0.1:  # 100 метров
+            now = timezone.now()
+            status = 'present' if now.time() < timezone.time(10, 0) else 'late'
+            Attendance.objects.create(user=request.user, status=status)
+            messages.success(request, f'Посещаемость отмечена как {status}')
+        else:
+            messages.error(request, 'Вы находитесь вне границ колледжа.')
+    return redirect('home')
+
+def calculate_distance(user_location, college_location):
+    return geodesic((user_location['lat'], user_location['lng']), (college_location['lat'], college_location['lng'])).kilometers
+
+@login_required
+def faculty_attendance(request, faculty_id):
+    faculty = get_object_or_404(Faculty, id=faculty_id)
+    students = Student.objects.filter(faculty=faculty)
+    attendance_records = Attendance.objects.filter(user__student__faculty=faculty)
+
+    if request.method == 'POST':
+        for student in students:
+            status = request.POST.get(str(student.id), 'absent')  # 'absent' по умолчанию
+            Attendance.objects.create(user=student.user, status=status)
+            messages.success(request, f'Посещаемость для {student.user.username} отмечена как {status}')
+
+    context = {
+        'faculty': faculty,
+        'students': students,
+        'attendance_records': attendance_records,
+    }
+    return render(request, 'attendance/faculty_attendance.html', context)
 @login_required
 def home(request):
     user = request.user
@@ -166,39 +281,6 @@ def login_view(request):
     return render(request, 'attendance/login.html')
 
 
-@login_required
-def mark_attendance(request):
-    if request.method == 'POST':
-        user_ip = request.META['REMOTE_ADDR']
-        try:
-            ipaddress.ip_address(user_ip)
-        except ValueError:
-            messages.error(request, 'Invalid IP address.')
-            return redirect('home')
-
-        try:
-            response = requests.get(f'http://ip-api.com/json/{user_ip}').json()
-            if response['status'] == 'fail':
-                raise ValueError('Failed to get location')
-            user_location = {'lat': response['lat'], 'lng': response['lon']}
-        except (requests.RequestException, ValueError, KeyError) as e:
-            messages.error(request, f'Error getting location: {e}')
-            return redirect('home')
-
-        college_location = {'lat': 42.85747034165005, 'lng': 74.59859944086045}
-        distance = calculate_distance(user_location, college_location)
-        if distance <= 0.5:
-            now = timezone.now()
-            status = 'present' if now.time() < timezone.time(10, 0) else 'late'
-            Attendance.objects.create(user=request.user, status=status)
-            messages.success(request, f'Attendance marked as {status}')
-        else:
-            messages.error(request, 'You are not within the college bounds.')
-    return redirect('home')
-
-
-def calculate_distance(user_location, college_location):
-    return geodesic(user_location, college_location).kilometers
 
 
 @login_required

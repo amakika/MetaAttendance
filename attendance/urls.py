@@ -28,4 +28,5 @@ urlpatterns = [
     path('attendance-by-hour/', views.attendance_by_hour, name='attendance_by_hour'),  # Статистика по часам
     path('filter-attendance/', views.filter_attendance, name='filter_attendance'),      # Фильтрация по полу и факультетам
     path('set-language/', views.set_language_view, name='set_language'),                # Выбор языка
+     path('leaderboard/', leaderboard, name='leaderboard'),
 ]

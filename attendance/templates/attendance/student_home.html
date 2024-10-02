@@ -193,10 +193,24 @@
             <h2 class="text-3xl font-bold text-center mb-8 floating">Welcome, <span id="username">{{ user.username }}</span></h2>
             <p class="text-center mb-4 text-xl">Your attendance streak: <span class="font-bold text-2xl text-primary-color">{{ attendance_streak }}</span> days</p>
 
-            <!-- Attendance form -->
-            <form method="post" action="{% url 'mark_attendance' %}" class="text-center mb-8">
-                {% csrf_token %}  <!-- Ensure CSRF token is included -->
+            <!-- Профиль пользователя -->
+            <div class="profile mb-8">
+                <h3 class="text-2xl font-bold mb-4">Profile Information</h3>
+                <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Enrolled Courses:</strong></p>
+                <ul>
+                    {% for course in user.courses.all %}
+                        <li>{{ course.name }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <form method="post" action="{% url 'mark_attendance' %}" class="text-center mb-4">
+                {% csrf_token %}
                 <button type="submit" class="btn text-lg font-semibold">Mark Attendance</button>
+                <a href="{% url 'leaderboard' %}" class="btn btn-secondary">Посмотреть таблицу лидеров по пропускам</a>
+
             </form>
 
             <div class="chart-container">
@@ -247,7 +261,6 @@
         </div>
     </div>
     <script>
-        // Dark mode toggle
         const darkModeToggle = document.getElementById('darkModeToggle');
         const body = document.body;
 
@@ -256,71 +269,112 @@
             updateChartColors();
         });
 
-        // Background animation
+        // Функция для создания анимации фона
         const backgroundAnimation = document.querySelector('.background-animation');
 
         function createCircle() {
             const circle = document.createElement('div');
             circle.classList.add('circle');
-            
             const size = Math.random() * 100 + 50;
             circle.style.width = `${size}px`;
             circle.style.height = `${size}px`;
-            
             circle.style.left = `${Math.random() * 100}%`;
             circle.style.top = `${Math.random() * 100}%`;
-            
             backgroundAnimation.appendChild(circle);
 
             anime({
                 targets: circle,
                 scale: [0, 1],
                 opacity: [1, 0],
-                duration: 2000,
-                easing: 'easeInOutSine',
+                translateX: anime.random(-200, 200),
+                translateY: anime.random(-200, 200),
+                duration: anime.random(3000, 5000),
+                easing: 'easeOutExpo',
                 complete: () => {
                     circle.remove();
+                    createCircle();
                 }
             });
         }
 
-        setInterval(createCircle, 500);
+        for (let i = 0; i < 10; i++) {
+            createCircle();
+        }
 
-        // Chart.js attendance chart
-        const ctx = document.getElementById('attendanceChart').getContext('2d');
-        const attendanceChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: {{ attendance_labels|safe }},
-                datasets: [{
-                    label: 'Attendance',
-                    data: {{ attendance_data|safe }},
-                    backgroundColor: 'rgba(52, 152, 219, 0.5)',
-                    borderColor: 'rgba(52, 152, 219, 1)',
-                    borderWidth: 1,
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
+        // Анимация приветственного сообщения
+        const username = document.getElementById('username');
+        anime({
+            targets: username,
+            opacity: [0, 1],
+            translateY: [20, 0],
+            duration: 1000,
+            easing: 'easeOutExpo'
         });
 
-        function updateChartColors() {
-            const chartArea = attendanceChart.chartArea;
-            if (chartArea) {
-                attendanceChart.data.datasets[0].backgroundColor = darkModeToggle.checked 
-                    ? 'rgba(236, 240, 241, 0.5)' 
-                    : 'rgba(52, 152, 219, 0.5)';
-                attendanceChart.data.datasets[0].borderColor = darkModeToggle.checked 
-                    ? 'rgba(236, 240, 241, 1)' 
-                    : 'rgba(52, 152, 219, 1)';
-                attendanceChart.update();
-            }
+        // Чарт посещаемости
+        const ctx = document.getElementById('attendanceChart').getContext('2d');
+        let attendanceChart;
+
+        function createChart() {
+            attendanceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Attendance',
+                        data: [5, 6, 4, 7, 5, 4, 6],
+                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color'),
+                        tension: 0.4,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10
+                        }
+                    }
+                }
+            });
         }
+
+        function updateChartColors() {
+            const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
+            const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color');
+
+            attendanceChart.data.datasets[0].borderColor = primaryColor;
+            attendanceChart.options.scales.x.ticks.color = textColor;
+            attendanceChart.options.scales.y.ticks.color = textColor;
+            attendanceChart.options.plugins.legend.labels.color = textColor;
+            attendanceChart.update();
+        }
+
+        createChart();
+
+        // Анимация строк таблицы
+        const tableRows = document.querySelectorAll('tr');
+        tableRows.forEach(row => {
+            row.addEventListener('mouseenter', () => {
+                anime({
+                    targets: row,
+                    translateX: 5,
+                    duration: 300,
+                    easing: 'easeOutExpo'
+                });
+            });
+
+            row.addEventListener('mouseleave', () => {
+                anime({
+                    targets: row,
+                    translateX: 0,
+                    duration: 300,
+                    easing: 'easeOutExpo'
+                });
+            });
+        });
     </script>
 </body>
 </html>

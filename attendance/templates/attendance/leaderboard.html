@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard по пропускам</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Leaderboard по пропускам</h1>
+
+        <form method="get" class="mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <select name="faculty" class="form-select">
+                        <option value="">Выберите факультет</option>
+                        {% for faculty in faculties %}
+                            <option value="{{ faculty.id }}"{% if faculty.id|stringformat:"s" == request.GET.faculty %} selected{% endif %}>{{ faculty.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select name="student" class="form-select">
+                        <option value="">Выберите студента</option>
+                        {% for student in students %}
+                            <option value="{{ student.id }}"{% if student.id|stringformat:"s" == request.GET.student %} selected{% endif %}>{{ student.user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">Фильтровать</button>
+                </div>
+            </div>
+        </form>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Студент</th>
+                    <th>Факультет</th>
+                    <th>Количество пропусков</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in student_leaderboard %}
+                    <tr>
+                        <td>{{ student.user.username }}</td>
+                        <td>{{ student.faculty.name }}</td>
+                        <td>{{ student.absent_days }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center">Нет данных.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

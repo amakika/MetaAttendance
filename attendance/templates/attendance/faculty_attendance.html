@@ -99,7 +99,7 @@
             font-size: 1.5rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 3px 3px 6px var(--shadow-color), -3px -3px 6px rgba(255, 255, 255, 0.5);
+            box-shadow: 3px 3px 6px var(--shadow-color), -3px -5px 10px rgba(255, 255, 255, 0.5);
         }
 
         .dark-mode-toggle:hover {
@@ -128,6 +128,10 @@
         .neumorphic-card:hover {
             transform: translateY(-5px);
             box-shadow: 8px 8px 15px var(--shadow-color), -8px -8px 15px rgba(255, 255, 255, 0.5);
+        }
+
+        input.error {
+            border: 1px solid red;
         }
     </style>
 </head>
@@ -167,7 +171,7 @@
             <i class="fas fa-clipboard-list me-2"></i>{{ faculty.name }} Attendance
         </h2>
 
-        <form method="post" action="{% url 'faculty_attendance' faculty.id %}">
+        <form method="post" action="{% url 'faculty_attendance' faculty.id %}" onsubmit="return confirm('Are you sure you want to save changes?');">
             {% csrf_token %}
             <div class="neumorphic-card fade-in">
                 <div class="table-responsive">
@@ -185,13 +189,13 @@
                                 <tr>
                                     <td>{{ student.name }}</td>
                                     <td>
-                                        <input type="number" name="present_{{ student.id }}" value="{{ stats.present }}" class="form-control" min="0">
+                                        <input type="number" name="present_{{ student.id }}" value="{{ stats.present }}" class="form-control{% if stats.present < 0 %} error{% endif %}" min="0">
                                     </td>
                                     <td>
-                                        <input type="number" name="late_{{ student.id }}" value="{{ stats.late }}" class="form-control" min="0">
+                                        <input type="number" name="late_{{ student.id }}" value="{{ stats.late }}" class="form-control{% if stats.late < 0 %} error{% endif %}" min="0">
                                     </td>
                                     <td>
-                                        <input type="number" name="absent_{{ student.id }}" value="{{ stats.absent }}" class="form-control" min="0">
+                                        <input type="number" name="absent_{{ student.id }}" value="{{ stats.absent }}" class="form-control{% if stats.absent < 0 %} error{% endif %}" min="0">
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -201,7 +205,6 @@
             </div>
             <button type="submit" class="btn btn-custom mt-3">Save Changes</button>
         </form>
-
     </div>
 
     <button class="dark-mode-toggle" id="darkModeToggle">
@@ -214,11 +217,19 @@
         const darkModeToggle = document.getElementById('darkModeToggle');
         const body = document.body;
 
+        // Load dark mode state from localStorage
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            body.classList.add('dark-mode');
+            darkModeToggle.querySelector('i').classList.replace('fa-moon', 'fa-sun');
+        }
+
         darkModeToggle.addEventListener('click', () => {
             body.classList.toggle('dark-mode');
             const icon = darkModeToggle.querySelector('i');
             icon.classList.toggle('fa-moon');
             icon.classList.toggle('fa-sun');
+            // Save dark mode state
+            localStorage.setItem('darkMode', body.classList.contains('dark-mode') ? 'enabled' : 'disabled');
         });
     </script>
 </body>
