@@ -12,6 +12,18 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 from django.utils.translation import gettext_lazy as _
+import os
+
+# Путь к корню вашего проекта
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# URL для доступа к загруженным медиафайлам
+MEDIA_URL = '/media/'
+
+# Путь к папке, где будут храниться загруженные файлы
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
+# Остальные настройки...
 
 
 
@@ -90,8 +102,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://metaattendance-production.up.railway.app',  # Your production URL
 ]
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
