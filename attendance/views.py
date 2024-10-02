@@ -43,6 +43,30 @@ from django.db.models import Count, Q
 from geopy.distance import geodesic
 import requests
 import ipaddress
+@login_required
+def profile(request):
+    user = request.user
+    profile = user.profile if hasattr(user, 'profile') else None
+
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=user)
+        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Ваш профиль успешно обновлен!')
+            return redirect('profile')
+        else:
+            messages.error(request, 'Пожалуйста, исправьте ошибки ниже.')
+    else:
+        user_form = UserForm(instance=user)
+        profile_form = ProfileForm(instance=profile)
+
+    return render(request, 'attendance/profile.html', {
+        'user_form': user_form,
+        'profile_form': profile_form
+    })
 def leaderboard(request):
     # Получаем количество пропусков для каждого студента
     student_leaderboard = Student.objects.annotate(
@@ -70,29 +94,6 @@ def leaderboard(request):
     return render(request, 'attendance/leaderboard.html', context)
 # Профиль студента
 @login_required
-def profile(request):
-    user = request.user
-    profile = user.profile if hasattr(user, 'profile') else None
-
-    if request.method == 'POST':
-        user_form = UserForm(request.POST, instance=user)
-        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
-        
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
-            profile_form.save()
-            messages.success(request, 'Ваш профиль успешно обновлен!')
-            return redirect('profile')
-        else:
-            messages.error(request, 'Пожалуйста, исправьте ошибки ниже.')
-    else:
-        user_form = UserForm(instance=user)
-        profile_form = ProfileForm(instance=profile)
-
-    return render(request, 'attendance/profile.html', {
-        'user_form': user_form,
-        'profile_form': profile_form
-    })
 
 @login_required
 def mark_attendance(request):

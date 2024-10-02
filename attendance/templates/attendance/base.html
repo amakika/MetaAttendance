@@ -148,7 +148,7 @@
                     </li>
                     {% if user.is_staff %}
                     <li class="nav-item">
-                        <a class="nav-link admin-dashboard glass" href="{% url 'admin_dashboard' %}"><i class="fas fa-user-cog me-1"></i>Admin Dashboard</a>
+                        <a href="{% url 'profile' %}" class="btn btn-custom">View Profile</a>
                     </li>
                     {% endif %}
                 </ul>
