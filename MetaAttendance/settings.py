@@ -86,6 +86,9 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'MetaAttendance.wsgi.application'
+CSRF_TRUSTED_ORIGINS = [
+    'https://metaattendance-production.up.railway.app',  # Your production URL
+]
 
 
 # Database
