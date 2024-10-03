@@ -1,10 +1,11 @@
 {% load i18n %}
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Meta Page{% endblock %}</title>
+    <title>{% block title %}Главная страница{% endblock %}</title>
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
@@ -136,30 +137,30 @@
         <div class="container">
             <a class="navbar-brand float-animation position-relative" href="{% url 'home' %}">
                 <div class="flag-kyrgyzstan"></div> <!-- Кыргызский флаг -->
-                <i class="fas fa-graduation-cap me-2"></i>Meta Page
+                <i class="fas fa-graduation-cap me-2"></i>Главная страница
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Переключить навигацию">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     {% csrf_token %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home me-1"></i>Home</a>
+                        <a class="nav-link" href="{% url 'home' %}"><i class="fas fa-home me-1"></i>Главная</a>
                     </li>
                     {% if user.is_staff %}
                     <li class="nav-item">
-                        <a href="{% url 'profile' %}" class="btn btn-custom">View Profile</a>
+                        <a href="{% url 'profile' %}" class="btn btn-custom">Посмотреть профиль</a>
                     </li>
                     {% endif %}
                 </ul>
                 {% if user.is_authenticated %}
                 <span class="navbar-text me-3 welcome-text">
-                    Welcome, {{ user.username }}
+                    Добро пожаловать, {{ user.username }}
                 </span>
-                <a href="{% url 'logout' %}" class="btn btn-custom"><i class="fas fa-sign-out-alt me-1"></i>Logout</a>
+                <a href="{% url 'logout' %}" class="btn btn-custom"><i class="fas fa-sign-out-alt me-1"></i>Выйти</a>
                 {% else %}
-                <a href="{% url 'login' %}" class="btn btn-custom"><i class="fas fa-sign-in-alt me-1"></i>Login</a>
+                <a href="{% url 'login' %}" class="btn btn-custom"><i class="fas fa-sign-in-alt me-1"></i>Войти</a>
                 {% endif %}
             </div>
         </div>
@@ -178,7 +179,7 @@
 
     <footer class="footer">
         <div class="container text-center">
-            <span>© 2023 Meta Page. All rights reserved.</span>
+            <span>© 2023 Главная страница. Все права защищены.</span>
         </div>
     </footer>
 
