@@ -3,412 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Home - Enhanced Experience</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
-    <style>
-        :root {
-            --primary-color: #3498db;
-            --secondary-color: #2ecc71;
-            --background-color: #f0f0f0;
-            --text-color: #333;
-            --neumorphic-light: #ffffff;
-            --neumorphic-dark: #d1d9e6;
-        }
-
-        .dark-mode {
-            --primary-color: #2980b9;
-            --secondary-color: #27ae60;
-            --background-color: #2c3e50;
-            --text-color: #ecf0f1;
-            --neumorphic-light: #34495e;
-            --neumorphic-dark: #2c3e50;
-        }
-
-        body {
-            font-family: 'Roboto', sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            transition: all 0.3s ease;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .neumorphic {
-            background: var(--background-color);
-            border-radius: 20px;
-            box-shadow: 8px 8px 15px var(--neumorphic-dark), -8px -8px 15px var(--neumorphic-light);
-            padding: 2rem;
-            transition: all 0.3s ease;
-        }
-
-        .btn {
-            background: var(--primary-color);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 4px 4px 10px var(--neumorphic-dark), -4px -4px 10px var(--neumorphic-light);
-        }
-
-        .btn:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
-        }
-
-        .toggle-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-        }
-
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 60px;
-            height: 34px;
-        }
-
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: .4s;
-            border-radius: 34px;
-        }
-
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 26px;
-            width: 26px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-
-        input:checked + .toggle-slider {
-            background-color: var(--primary-color);
-        }
-
-        input:checked + .toggle-slider:before {
-            transform: translateX(26px);
-        }
-
-        .background-animation {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .circle {
-            position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--primary-color) 0%, transparent 70%);
-            opacity: 0.1;
-        }
-
-        .leaderboard, .faculty-attendance {
-            margin-top: 2rem;
-        }
-
-        .leaderboard table, .faculty-attendance table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0 10px;
-        }
-
-        .leaderboard th, .leaderboard td, .faculty-attendance th, .faculty-attendance td {
-            padding: 1rem;
-            text-align: left;
-        }
-
-        .leaderboard th, .faculty-attendance th {
-            background-color: var(--primary-color);
-            color: white;
-            border-radius: 10px 10px 0 0;
-        }
-
-        .leaderboard tr, .faculty-attendance tr {
-            background-color: var(--neumorphic-light);
-            box-shadow: 4px 4px 10px var(--neumorphic-dark), -4px -4px 10px var(--neumorphic-light);
-            border-radius: 10px;
-            transition: all 0.3s ease;
-        }
-
-        .leaderboard tr:hover, .faculty-attendance tr:hover {
-            transform: translateY(-3px);
-            box-shadow: 6px 6px 15px var(--neumorphic-dark), -6px -6px 15px var(--neumorphic-light);
-        }
-
-        .chart-container {
-            margin-top: 2rem;
-            height: 300px;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .floating {
-            animation: float 3s ease-in-out infinite;
-        }
-    </style>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Attendance Dashboard</title>
+    <title>Student Home</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
-    <style>
-        .background-animation {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: -1;
-        }
-        .circle {
-            position: absolute;
-            border-radius: 50%;
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        .toggle-slider {
-            background-color: var(--primary-color);
-        }
-        .dark-mode .toggle-slider {
-            background-color: var(--secondary-color);
-        }
-    </style>
 </head>
-<body class="flex items-center justify-center min-h-screen relative">
-    <div class="background-animation"></div>
-    <div class="toggle-container absolute top-4 right-4">
-        <label class="toggle-switch">
-            <input type="checkbox" id="darkModeToggle">
-            <span class="toggle-slider"></span>
-        </label>
-    </div>
-    <div class="container mx-auto p-4">
-        <div class="neumorphic p-8 rounded shadow-lg bg-white dark:bg-gray-800">
-            <h2 class="text-3xl font-bold text-center mb-8 floating">Welcome, <span id="username">{{ user.username }}</span></h2>
-            <p class="text-center mb-4 text-xl">Your attendance streak: <span class="font-bold text-2xl text-primary-color">{{ attendance_streak }}</span> days</p>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="container mx-auto p-4 bg-white rounded shadow-lg">
+        <h2 class="text-3xl font-bold text-center mb-8">Welcome, {{ user.username }}</h2>
+        <p class="text-center mb-4 text-xl">Your attendance streak: <span class="font-bold text-2xl text-primary-color">{{ attendance_streak }}</span> days</p>
+        
+        <form method="post" action="{% url 'mark_attendance' %}" class="text-center mb-8">
+            {% csrf_token %}
+            <button type="submit" class="btn text-lg font-semibold px-4 py-2 bg-blue-500 rounded hover:bg-blue-600 transition">Mark Attendance</button>
+        </form>
 
-            <form method="post" action="{% url 'mark_attendance' %}" class="text-center mb-8">
-                {% csrf_token %}
-                <button type="submit" class="btn text-lg font-semibold px-4 py-2 bg-blue-500 rounded hover:bg-blue-600 transition">Mark Attendance</button>
-            </form>
-
-            <div class="chart-container mb-8">
-                <canvas id="attendanceChart"></canvas>
-            </div>
-
-            <div class="leaderboard mb-8">
-                <h3 class="text-2xl font-bold mb-4">Student Leaderboard</h3>
-                <table class="min-w-full bg-white dark:bg-gray-700">
-                    <thead>
-                        <tr class="bg-gray-200 dark:bg-gray-600">
-                            <th class="py-2">Rank</th>
-                            <th>Student</th>
-                            <th>Present Days</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for student in student_leaderboard %}
-                            <tr class="hover:bg-gray-100 dark:hover:bg-gray-600">
-                                <td class="py-2">{{ forloop.counter }}</td>
-                                <td>{{ student.user.username }}</td>
-                                <td>{{ student.present_days }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="faculty-attendance">
-                <h3 class="text-2xl font-bold mb-4">Faculty Attendance</h3>
-                <table class="min-w-full bg-white dark:bg-gray-700">
-                    <thead>
-                        <tr class="bg-gray-200 dark:bg-gray-600">
-                            <th class="py-2">Faculty</th>
-                            <th>Present Days</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for faculty in faculty_attendance %}
-                            <tr class="hover:bg-gray-100 dark:hover:bg-gray-600">
-                                <td class="py-2">{{ faculty.name }}</td>
-                                <td>{{ faculty.present_days }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+        <div class="text-center mb-8">
+            <a href="{% url 'leaderboard' %}" class="btn text-lg font-semibold px-4 py-2 bg-green-500 rounded hover:bg-green-600 transition">View Leaderboard</a>
         </div>
+
+        <h3 class="text-2xl font-bold mb-4">Student Leaderboard</h3>
+        <table class="min-w-full bg-white mb-8">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="py-2 px-4">Rank</th>
+                    <th class="py-2 px-4">Student</th>
+                    <th class="py-2 px-4">Present Days</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in student_leaderboard %}
+                <tr class="hover:bg-gray-50">
+                    <td class="border-t py-2 px-4">{{ forloop.counter }}</td>
+                    <td class="border-t py-2 px-4">{{ student.user.username }}</td>
+                    <td class="border-t py-2 px-4">{{ student.present_days }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center py-4">No students available</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h3 class="text-2xl font-bold mb-4">Faculty Attendance</h3>
+        <table class="min-w-full bg-white">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="py-2 px-4">Faculty</th>
+                    <th class="py-2 px-4">Present Days</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for faculty in faculty_attendance %}
+                <tr class="hover:bg-gray-50">
+                    <td class="border-t py-2 px-4">{{ faculty.name }}</td>
+                    <td class="border-t py-2 px-4">{{ faculty.present_days }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center py-4">No faculty data available</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const body = document.body;
-
-        darkModeToggle.addEventListener('change', () => {
-            body.classList.toggle('dark-mode');
-            updateChartColors();
-        });
-
-        const backgroundAnimation = document.querySelector('.background-animation');
-
-        function createCircle() {
-            const circle = document.createElement('div');
-            circle.classList.add('circle');
-            
-            const size = Math.random() * 100 + 50;
-            circle.style.width = `${size}px`;
-            circle.style.height = `${size}px`;
-            
-            circle.style.left = `${Math.random() * 100}%`;
-            circle.style.top = `${Math.random() * 100}%`;
-            
-            backgroundAnimation.appendChild(circle);
-
-            anime({
-                targets: circle,
-                scale: [0, 1],
-                opacity: [1, 0],
-                translateX: anime.random(-200, 200),
-                translateY: anime.random(-200, 200),
-                duration: anime.random(3000, 5000),
-                easing: 'easeOutExpo',
-                complete: () => {
-                    circle.remove();
-                    createCircle();
-                }
-            });
-        }
-
-        for (let i = 0; i < 10; i++) {
-            createCircle();
-        }
-
-        const username = document.getElementById('username');
-        anime({
-            targets: username,
-            opacity: [0, 1],
-            translateY: [20, 0],
-            duration: 1000,
-            easing: 'easeOutExpo'
-        });
-
-        const button = document.querySelector('.btn');
-        button.addEventListener('mouseover', () => {
-            anime({
-                targets: button,
-                scale: 1.05,
-                duration: 300,
-                easing: 'easeOutExpo'
-            });
-        });
-
-        button.addEventListener('mouseout', () => {
-            anime({
-                targets: button,
-                scale: 1,
-                duration: 300,
-                easing: 'easeOutExpo'
-            });
-        });
-
         const ctx = document.getElementById('attendanceChart').getContext('2d');
-        let attendanceChart;
+        const attendanceData = {{ attendance_data|safe }};
+        const attendanceLabels = {{ attendance_labels|safe }};
 
-        function createChart() {
-            attendanceChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [{
-                        label: 'Attendance',
-                        data: [5, 6, 4, 7, 5, 4, 6],
-                        borderColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-color'),
-                        tension: 0.4,
-                        fill: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 10
-                        }
+        const attendanceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: attendanceLabels,
+                datasets: [{
+                    label: 'Attendance',
+                    data: attendanceData,
+                    borderColor: '#4A90E2',
+                    tension: 0.4,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
                     }
                 }
-            });
-        }
-
-        function updateChartColors() {
-            const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color');
-            const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-color');
-
-            attendanceChart.data.datasets[0].borderColor = primaryColor;
-            attendanceChart.options.scales.x.ticks.color = textColor;
-            attendanceChart.options.scales.y.ticks.color = textColor;
-            attendanceChart.options.plugins.legend.labels.color = textColor;
-            attendanceChart.update();
-        }
-
-        createChart();
-
-        const tableRows = document.querySelectorAll('tr');
-        tableRows.forEach(row => {
-            row.addEventListener('mouseenter', () => {
-                anime({
-                    targets: row,
-                    translateX: 5,
-                    duration: 300,
-                    easing: 'easeOutExpo'
-                });
-            });
-
-            row.addEventListener('mouseleave', () => {
-                anime({
-                    targets: row,
-                    translateX: 0,
-                    duration: 300,
-                    easing: 'easeOutExpo'
-                });
-            });
+            }
         });
     </script>
 </body>
