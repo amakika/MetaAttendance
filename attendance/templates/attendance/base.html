@@ -43,10 +43,9 @@
             font-family: 'Poppins', sans-serif;
             color: var(--text-color);
             position: relative;
-            transition: all 0.3s ease;
+            transition: all 0.5s ease;
         }
 
-        /* Кыргызские узоры на фоне */
         body::before {
             content: "";
             position: fixed;
@@ -54,12 +53,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('https://i.imgur.com/YOUR_UPLOADED_IMAGE_URL.jpg'); /* Замените на фактический URL узора */
+            background-image: url('https://i.imgur.com/YOUR_UPLOADED_IMAGE_URL.jpg');
             background-repeat: repeat;
             background-size: contain;
             opacity: 0.1;
             z-index: -1;
-            transition: all 0.3s ease;
+            transition: all 0.5s ease;
         }
 
         .dark-mode body::before {
@@ -74,7 +73,7 @@
             box-shadow: 20px 20px 60px var(--shadow-color), -20px -20px 60px var(--shadow-color);
             margin-top: 2rem;
             margin-bottom: 2rem;
-            transition: all 0.3s ease;
+            transition: all 0.5s ease;
         }
 
         .dark-mode .content {
@@ -84,6 +83,7 @@
         .navbar {
             background-color: var(--primary-color);
             box-shadow: 0 2px 10px var(--shadow-color);
+            transition: all 0.5s ease;
         }
 
         .navbar-brand, .nav-link {
@@ -96,7 +96,6 @@
             transform: translateY(-2px);
         }
 
-        /* Кыргызский флаг вместо калпака */
         .flag-kyrgyzstan {
             width: 40px;
             height: 40px;
@@ -120,7 +119,7 @@
             height: 50px;
             font-size: 1.5rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.5s ease;
             z-index: 1000;
         }
 
@@ -128,15 +127,49 @@
             background-color: var(--accent-color);
             transform: scale(1.1);
         }
+
+        .kyrgyz-pattern {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-image: url('https://i.imgur.com/KYRGYZ_PATTERN_URL.png');
+            background-size: contain;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .kyrgyz-pattern-1 {
+            top: 20px;
+            left: 20px;
+            transform: rotate(15deg);
+        }
+
+        .kyrgyz-pattern-2 {
+            bottom: 20px;
+            right: 20px;
+            transform: rotate(-15deg);
+        }
+
+        .dark-mode .navbar-brand, .dark-mode .nav-link {
+            color: #fff !important;
+        }
+
+        .dark-mode .btn-custom {
+            background-color: var(--accent-color);
+            color: var(--text-color);
+        }
+
+        .dark-mode .welcome-text {
+            color: var(--accent-color);
+        }
     </style>
 </head>
 
 <body>
-
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand float-animation position-relative" href="{% url 'home' %}">
-                <div class="flag-kyrgyzstan"></div> <!-- Кыргызский флаг -->
+                <div class="flag-kyrgyzstan"></div>
                 <i class="fas fa-graduation-cap me-2"></i>Главная страница
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Переключить навигацию">
@@ -187,6 +220,9 @@
         <i class="fas fa-moon"></i>
     </button>
 
+    <div class="kyrgyz-pattern kyrgyz-pattern-1"></div>
+    <div class="kyrgyz-pattern kyrgyz-pattern-2"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         const darkModeToggle = document.getElementById('darkModeToggle');
@@ -204,6 +240,15 @@
         gsap.from(".navbar", {duration: 1, y: -50, opacity: 0, ease: "power3.out"});
         gsap.from(".content", {duration: 1, y: 50, opacity: 0, ease: "power3.out", delay: 0.5});
         gsap.from(".footer", {duration: 1, y: 50, opacity: 0, ease: "power3.out", delay: 0.7});
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
     </script>
 </body>
 </html>
