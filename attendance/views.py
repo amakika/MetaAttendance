@@ -64,11 +64,15 @@ import ipaddress
 def faculty_attendance(request, faculty_id):
     faculty = get_object_or_404(Faculty, id=faculty_id)
     students = Student.objects.filter(faculty=faculty)
-    
+
     attendance_stats = {}
     for student in students:
-        # Предполагаем, что у вас есть метод для получения статистики посещаемости
-        stats = get_attendance_stats(student)
+        # Здесь предполагается, что у вас есть метод для получения статистики посещаемости
+        stats = {
+            'present': student.attendance.filter(status='present').count(),
+            'late': student.attendance.filter(status='late').count(),
+            'absent': student.attendance.filter(status='absent').count(),
+        }
         attendance_stats[student] = stats
 
     context = {
