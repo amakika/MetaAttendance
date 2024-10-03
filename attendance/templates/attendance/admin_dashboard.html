@@ -1,6 +1,6 @@
 {% extends 'attendance/base.html' %}
 
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Админ Панель{% endblock %}
 
 {% block content %}
 <style>
@@ -229,40 +229,40 @@
 </button>
 
 <div class="dashboard-container">
-    <h2>Admin Dashboard</h2>
+    <h2>Админ Панель</h2>
 
     <div class="stats-container">
         <div class="stat-card">
-            <h4>Total Students</h4>
+            <h4>Общее количество студентов</h4>
             <p>{{ total_students }}</p>
         </div>
         <div class="stat-card">
-            <h4>Total Teachers</h4>
+            <h4>Общее количество учителей</h4>
             <p>{{ total_teachers }}</p>
         </div>
         <div class="stat-card">
-            <h4>Total Faculties</h4>
+            <h4>Общее количество факультетов</h4>
             <p>{{ faculties.count }}</p>
         </div>
     </div>
 
-    <h3>Faculties</h3>
+    <h3>Факультеты</h3>
     <ul class="list-group">
         {% for faculty in faculties %}
             <li class="list-group-item">
                 <a href="{% url 'faculty_attendance' faculty.id %}">{{ faculty.name }}</a>
             </li>
         {% empty %}
-            <li class="list-group-item">No faculties available</li>
+            <li class="list-group-item">Факультеты отсутствуют</li>
         {% endfor %}
     </ul>
     <div class="btn-container">
-        <a href="{% url 'add_student' %}" class="btn btn-primary">Add Student</a>
-        <a href="{% url 'add_teacher' %}" class="btn btn-primary">Add Teacher</a>
-        <a href="{% url 'add_faculty' %}" class="btn btn-primary">Add Faculty</a>
-        <a href="{% url 'all_teachers' %}" class="btn btn-secondary">All Teachers</a>
-        <a href="{% url 'attendance_by_hour' %}" class="btn btn-secondary">Attendance by Hour</a>
-        <a href="{% url 'filter_attendance' %}" class="btn btn-secondary">Filter Attendance</a>
+        <a href="{% url 'add_student' %}" class="btn btn-primary">Добавить студента</a>
+        <a href="{% url 'add_teacher' %}" class="btn btn-primary">Добавить учителя</a>
+        <a href="{% url 'add_faculty' %}" class="btn btn-primary">Добавить факультет</a>
+        <a href="{% url 'all_teachers' %}" class="btn btn-secondary">Все учителя</a>
+        <a href="{% url 'attendance_by_hour' %}" class="btn btn-secondary">Посещения по часам</a>
+        <a href="{% url 'filter_attendance' %}" class="btn btn-secondary">Фильтр посещаемости</a>
     </div>
 </div>
 
