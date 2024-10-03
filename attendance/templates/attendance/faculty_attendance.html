@@ -15,7 +15,6 @@
             --text-color: #333;
             --shadow-color: rgba(0, 0, 0, 0.1);
         }
-
         .dark-mode {
             --primary-color: #ff6b6b;
             --secondary-color: #4ecdc4;
@@ -23,31 +22,22 @@
             --text-color: #ecf0f1;
             --shadow-color: rgba(255, 255, 255, 0.1);
         }
-
         body {
             font-family: 'Poppins', sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
             transition: background-color 0.3s, color 0.3s;
         }
-
         .navbar {
             background-color: var(--background-color);
             box-shadow: 5px 5px 10px var(--shadow-color), -5px -5px 10px rgba(255, 255, 255, 0.5);
         }
-
-        .navbar-brand {
-            font-weight: 600;
-            color: var(--primary-color);
-        }
-
         .table {
             background-color: var(--background-color);
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 5px 5px 10px var(--shadow-color), -5px -5px 10px rgba(255, 255, 255, 0.5);
         }
-
         .table thead th {
             background-color: var(--primary-color);
             color: #ffffff;
@@ -55,11 +45,9 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-
         .table-hover tbody tr:hover {
             background-color: rgba(241, 248, 255, 0.1);
         }
-
         .btn-custom {
             background-color: var(--primary-color);
             color: #ffffff;
@@ -69,23 +57,16 @@
             transition: all 0.3s ease;
             box-shadow: 3px 3px 6px var(--shadow-color), -3px -3px 6px rgba(255, 255, 255, 0.5);
         }
-
         .btn-custom:hover {
             background-color: var(--secondary-color);
             transform: translateY(-2px);
             box-shadow: 5px 5px 10px var(--shadow-color), -5px -5px 10px rgba(255, 255, 255, 0.5);
         }
-
         .faculty-title {
             color: var(--primary-color);
             font-weight: 600;
             margin-bottom: 1.5rem;
         }
-
-        .btn.btn-link.text-danger {
-            color: var(--primary-color);
-        }
-
         .dark-mode-toggle {
             position: fixed;
             bottom: 20px;
@@ -100,38 +81,6 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 3px 3px 6px var(--shadow-color), -3px -5px 10px rgba(255, 255, 255, 0.5);
-        }
-
-        .dark-mode-toggle:hover {
-            background-color: var(--secondary-color);
-            transform: scale(1.1);
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .neumorphic-card {
-            background-color: var(--background-color);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 5px 5px 10px var(--shadow-color), -5px -5px 10px rgba(255, 255, 255, 0.5);
-            transition: all 0.3s ease;
-        }
-
-        .neumorphic-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 8px 8px 15px var(--shadow-color), -8px -8px 15px rgba(255, 255, 255, 0.5);
-        }
-
-        input.error {
-            border: 1px solid red;
         }
     </style>
 </head>
@@ -160,48 +109,50 @@
     <div class="container mt-5">
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show neumorphic-card" role="alert">
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endfor %}
         {% endif %}
 
-        <h2 class="faculty-title mb-4 fade-in">
+        <h2 class="faculty-title mb-4">
             <i class="fas fa-clipboard-list me-2"></i>{{ faculty.name }} Attendance
         </h2>
 
         <form method="post" action="{% url 'faculty_attendance' faculty.id %}" onsubmit="return confirm('Are you sure you want to save changes?');">
             {% csrf_token %}
-            <div class="neumorphic-card fade-in">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-user me-2"></i>Student</th>
+                            <th><i class="fas fa-check me-2"></i>Present</th>
+                            <th><i class="fas fa-clock me-2"></i>Late</th>
+                            <th><i class="fas fa-times me-2"></i>Absent</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student, stats in attendance_stats.items %}
                             <tr>
-                                <th><i class="fas fa-user me-2"></i>Student</th>
-                                <th><i class="fas fa-check me-2"></i>Present</th>
-                                <th><i class="fas fa-clock me-2"></i>Late</th>
-                                <th><i class="fas fa-times me-2"></i>Absent</th>
+                                <td>{{ student.name }}</td>
+                                <td>
+                                    <input type="number" name="present_{{ student.id }}" value="{{ stats.present }}" class="form-control{% if stats.present < 0 %} error{% endif %}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" name="late_{{ student.id }}" value="{{ stats.late }}" class="form-control{% if stats.late < 0 %} error{% endif %}" min="0">
+                                </td>
+                                <td>
+                                    <input type="number" name="absent_{{ student.id }}" value="{{ stats.absent }}" class="form-control{% if stats.absent < 0 %} error{% endif %}" min="0">
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {% for student, stats in attendance_stats.items %}
-                                <tr>
-                                    <td>{{ student.name }}</td>
-                                    <td>
-                                        <input type="number" name="present_{{ student.id }}" value="{{ stats.present }}" class="form-control{% if stats.present < 0 %} error{% endif %}" min="0">
-                                    </td>
-                                    <td>
-                                        <input type="number" name="late_{{ student.id }}" value="{{ stats.late }}" class="form-control{% if stats.late < 0 %} error{% endif %}" min="0">
-                                    </td>
-                                    <td>
-                                        <input type="number" name="absent_{{ student.id }}" value="{{ stats.absent }}" class="form-control{% if stats.absent < 0 %} error{% endif %}" min="0">
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4">Нет студентов для отображения.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
             <button type="submit" class="btn btn-custom mt-3">Save Changes</button>
         </form>
