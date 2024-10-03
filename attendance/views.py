@@ -60,7 +60,23 @@ from geopy.distance import geodesic
 import requests
 import ipaddress
 
+@login_required
+def faculty_attendance(request, faculty_id):
+    faculty = get_object_or_404(Faculty, id=faculty_id)
+    students = Student.objects.filter(faculty=faculty)
+    
+    attendance_stats = {}
+    for student in students:
+        # Предполагаем, что у вас есть метод для получения статистики посещаемости
+        stats = get_attendance_stats(student)
+        attendance_stats[student] = stats
 
+    context = {
+        'faculty': faculty,
+        'attendance_stats': attendance_stats,
+        'students': students,
+    }
+    return render(request, 'attendance/faculty_attendance.html', context)
 
 
 
@@ -121,24 +137,7 @@ def mark_attendance(request):
 def calculate_distance(user_location, college_location):
     return geodesic((user_location['lat'], user_location['lng']), (college_location['lat'], college_location['lng'])).kilometers
 
-@login_required
-def faculty_attendance(request, faculty_id):
-    faculty = get_object_or_404(Faculty, id=faculty_id)
-    students = Student.objects.filter(faculty=faculty)
-    attendance_records = Attendance.objects.filter(user__student__faculty=faculty)
 
-    if request.method == 'POST':
-        for student in students:
-            status = request.POST.get(str(student.id), 'absent')
-            Attendance.objects.create(user=student.user, status=status)
-            messages.success(request, f'Attendance for {student.user.username} marked as {status}')
-
-    context = {
-        'faculty': faculty,
-        'students': students,
-        'attendance_records': attendance_records,
-    }
-    return render(request, 'attendance/faculty_attendance.html', context)
 
 @login_required
 def home(request):
