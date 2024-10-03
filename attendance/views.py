@@ -46,11 +46,23 @@ import ipaddress
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import UserForm, ProfileForm
-
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login
+from django.contrib import messages
+from .models import Student, Teacher, Attendance, Faculty, Profile
+from django.utils import timezone
+from django.urls import reverse
+from django.db.models import Count, Q
+from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.conf import settings
+from geopy.distance import geodesic
+import requests
+import ipaddress
 
 def profile(request):
     user = request.user
-    profile = user.profile if hasattr(user, 'profile') else None
+    profile = getattr(user, 'profile', None)
 
     if request.method == 'POST':
         user_form = UserForm(request.POST, instance=user)
@@ -59,10 +71,10 @@ def profile(request):
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
-            messages.success(request, 'Ваш профиль успешно обновлен!')
+            messages.success(request, 'Your profile was successfully updated!')
             return redirect('profile')
         else:
-            messages.error(request, 'Пожалуйста, исправьте ошибки ниже.')
+            messages.error(request, 'Please correct the errors below.')
     else:
         user_form = UserForm(instance=user)
         profile_form = ProfileForm(instance=profile)
@@ -71,13 +83,12 @@ def profile(request):
         'user_form': user_form,
         'profile_form': profile_form
     })
+
 def leaderboard(request):
-    # Получаем количество пропусков для каждого студента
     student_leaderboard = Student.objects.annotate(
         absent_days=Count('user__attendance', filter=Q(user__attendance__status='absent'))
     ).order_by('-absent_days')
 
-    # Добавляем фильтрацию по факультетам и студентам
     faculty_filter = request.GET.get('faculty', None)
     student_filter = request.GET.get('student', None)
 
@@ -87,8 +98,8 @@ def leaderboard(request):
     if student_filter:
         student_leaderboard = student_leaderboard.filter(id=student_filter)
 
-    faculties = Faculty.objects.all()  # Получаем все факультеты для фильтрации
-    students = Student.objects.all()    # Получаем всех студентов для фильтрации
+    faculties = Faculty.objects.all()
+    students = Student.objects.all()
 
     context = {
         'student_leaderboard': student_leaderboard,
@@ -96,8 +107,6 @@ def leaderboard(request):
         'students': students,
     }
     return render(request, 'attendance/leaderboard.html', context)
-# Профиль студента
-@login_required
 
 @login_required
 def mark_attendance(request):
@@ -106,27 +115,27 @@ def mark_attendance(request):
         try:
             ipaddress.ip_address(user_ip)
         except ValueError:
-            messages.error(request, 'Недействительный IP адрес.')
+            messages.error(request, 'Invalid IP address.')
             return redirect('home')
 
         try:
             response = requests.get(f'http://ip-api.com/json/{user_ip}').json()
             if response['status'] == 'fail':
-                raise ValueError('Не удалось получить местоположение')
+                raise ValueError('Failed to get location')
             user_location = {'lat': response['lat'], 'lng': response['lon']}
         except (requests.RequestException, ValueError, KeyError) as e:
-            messages.error(request, f'Ошибка получения местоположения: {e}')
+            messages.error(request, f'Error getting location: {e}')
             return redirect('home')
 
         college_location = {'lat': 42.85747034165005, 'lng': 74.59859944086045}
         distance = calculate_distance(user_location, college_location)
-        if distance <= 0.1:  # 100 метров
+        if distance <= 0.1:
             now = timezone.now()
             status = 'present' if now.time() < timezone.time(10, 0) else 'late'
             Attendance.objects.create(user=request.user, status=status)
-            messages.success(request, f'Посещаемость отмечена как {status}')
+            messages.success(request, f'Attendance marked as {status}')
         else:
-            messages.error(request, 'Вы находитесь вне границ колледжа.')
+            messages.error(request, 'You are outside the college boundaries.')
     return redirect('home')
 
 def calculate_distance(user_location, college_location):
@@ -140,9 +149,9 @@ def faculty_attendance(request, faculty_id):
 
     if request.method == 'POST':
         for student in students:
-            status = request.POST.get(str(student.id), 'absent')  # 'absent' по умолчанию
+            status = request.POST.get(str(student.id), 'absent')
             Attendance.objects.create(user=student.user, status=status)
-            messages.success(request, f'Посещаемость для {student.user.username} отмечена как {status}')
+            messages.success(request, f'Attendance for {student.user.username} marked as {status}')
 
     context = {
         'faculty': faculty,
@@ -150,6 +159,7 @@ def faculty_attendance(request, faculty_id):
         'attendance_records': attendance_records,
     }
     return render(request, 'attendance/faculty_attendance.html', context)
+
 @login_required
 def home(request):
     user = request.user
@@ -157,7 +167,6 @@ def home(request):
     if hasattr(user, 'student'):
         attendance_streak = user.student.get_attendance_streak()
 
-        # Leaderboard by gender
         male_students = Student.objects.filter(profile__gender='male').annotate(
             present_days=Count('user__attendance', filter=Q(user__attendance__status='present'))
         ).order_by('-present_days')
@@ -179,7 +188,6 @@ def home(request):
         return render(request, 'attendance/student_home.html', context)
 
     elif hasattr(user, 'teacher'):
-        # Leaderboard for teachers
         student_leaderboard = Student.objects.annotate(
             present_days=Count('user__attendance', filter=Q(user__attendance__status='present'))
         ).order_by('-present_days')
@@ -199,6 +207,64 @@ def home(request):
 
     else:
         return render(request, 'attendance/error.html', {'message': 'User type not recognized'})
+
+@login_required
+def all_teachers(request):
+    teachers = Teacher.objects.all()
+    context = {
+        'teachers': teachers,
+    }
+    return render(request, 'attendance/all_teachers.html', context)
+
+# Ensure this is not duplicated in your code
+@login_required
+def admin_dashboard(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    teachers = Teacher.objects.all().annotate(
+        total_days=Count('user__attendance', distinct=True),
+        present_days=Count('user__attendance', filter=Q(user__attendance__status='present')),
+        absent_days=Count('user__attendance', filter=Q(user__attendance__status='absent')),
+    )
+
+    faculty_attendance = Faculty.objects.annotate(
+        present_days=Count('students__user__attendance', filter=Q(students__user__attendance__status='present'))
+    ).order_by('-present_days')
+
+    context = {
+        'teachers': teachers,
+        'faculties': Faculty.objects.all(),
+        'faculty_attendance': faculty_attendance,
+    }
+    return render(request, 'attendance/admin_dashboard.html', context)
+
+# Other functions unchanged...
+
+# Профиль студента
+
+
+
+
+@login_required
+def faculty_attendance(request, faculty_id):
+    faculty = get_object_or_404(Faculty, id=faculty_id)
+    students = Student.objects.filter(faculty=faculty)
+    attendance_records = Attendance.objects.filter(user__student__faculty=faculty)
+
+    if request.method == 'POST':
+        for student in students:
+            status = request.POST.get(str(student.id), 'absent')  # 'absent' по умолчанию
+            Attendance.objects.create(user=student.user, status=status)
+            messages.success(request, f'Посещаемость для {student.user.username} отмечена как {status}')
+
+    context = {
+        'faculty': faculty,
+        'students': students,
+        'attendance_records': attendance_records,
+    }
+    return render(request, 'attendance/faculty_attendance.html', context)
+
 # Other views...
 @login_required
 def all_teachers(request):
