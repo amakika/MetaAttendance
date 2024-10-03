@@ -9,7 +9,7 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Photo</th>
+                
                 <th>Student</th>
                 <th>Present Days</th>
             </tr>
@@ -17,13 +17,7 @@
         <tbody>
             {% for student in student_leaderboard %}
                 <tr>
-                    <td>
-                        {% if student.profile.photo %}
-                            <img src="{{ student.profile.photo.url }}" alt="{{ student.username }}'s photo" style="width: 50px; height: 50px; border-radius: 50%;">
-                        {% else %}
-                            <img src="{% static 'default_profile.png' %}" alt="Default photo" style="width: 50px; height: 50px; border-radius: 50%;">
-                        {% endif %}
-                    </td>
+             
                     <td>{{ student.username }}</td>
                     <td>{{ student.present_days }}</td>
                 </tr>
