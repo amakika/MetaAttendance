@@ -179,54 +179,72 @@
             animation: float 3s ease-in-out infinite;
         }
     </style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <style>
+        .background-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .toggle-slider {
+            background-color: var(--primary-color);
+        }
+        .dark-mode .toggle-slider {
+            background-color: var(--secondary-color);
+        }
+    </style>
 </head>
-<body class="flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen relative">
     <div class="background-animation"></div>
-    <div class="toggle-container">
+    <div class="toggle-container absolute top-4 right-4">
         <label class="toggle-switch">
             <input type="checkbox" id="darkModeToggle">
             <span class="toggle-slider"></span>
         </label>
     </div>
-    <div class="container">
-        <div class="neumorphic">
+    <div class="container mx-auto p-4">
+        <div class="neumorphic p-8 rounded shadow-lg bg-white dark:bg-gray-800">
             <h2 class="text-3xl font-bold text-center mb-8 floating">Welcome, <span id="username">{{ user.username }}</span></h2>
             <p class="text-center mb-4 text-xl">Your attendance streak: <span class="font-bold text-2xl text-primary-color">{{ attendance_streak }}</span> days</p>
 
-            <!-- Профиль пользователя -->
-            
-
-            <form method="post" action="{% url 'mark_attendance' %}" class="text-center mb-4">
+            <form method="post" action="{% url 'mark_attendance' %}" class="text-center mb-8">
                 {% csrf_token %}
-                <button type="submit" class="btn text-lg font-semibold">Mark Attendance</button>
-                <a href="{% url 'leaderboard' %}" class="btn btn-secondary">Посмотреть таблицу лидеров по пропускам</a>
-                <form method="post" action="{% url 'mark_attendance' %}" class="text-center mb-4">
-                    {% csrf_token %}
-                    <button type="submit" class="btn text-lg font-semibold">Mark Attendance</button>
-                    <a href="{% url 'leaderboard' %}" class="btn btn-secondary">Посмотреть таблицу лидеров по пропускам</a>
-                    <a href="{% url 'profile' %}" class="btn btn-custom mb-2">Edit Profile</a>
-                </form>
-
+                <button type="submit" class="btn text-lg font-semibold px-4 py-2 bg-blue-500 rounded hover:bg-blue-600 transition">Mark Attendance</button>
             </form>
 
-            <div class="chart-container">
+            <div class="chart-container mb-8">
                 <canvas id="attendanceChart"></canvas>
             </div>
 
-            <div class="leaderboard">
+            <div class="leaderboard mb-8">
                 <h3 class="text-2xl font-bold mb-4">Student Leaderboard</h3>
-                <table>
+                <table class="min-w-full bg-white dark:bg-gray-700">
                     <thead>
-                        <tr>
-                            <th>Rank</th>
+                        <tr class="bg-gray-200 dark:bg-gray-600">
+                            <th class="py-2">Rank</th>
                             <th>Student</th>
                             <th>Present Days</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for student in student_leaderboard %}
-                            <tr>
-                                <td>{{ forloop.counter }}</td>
+                            <tr class="hover:bg-gray-100 dark:hover:bg-gray-600">
+                                <td class="py-2">{{ forloop.counter }}</td>
                                 <td>{{ student.user.username }}</td>
                                 <td>{{ student.present_days }}</td>
                             </tr>
@@ -235,19 +253,19 @@
                 </table>
             </div>
 
-            <div class="faculty-attendance mt-8">
+            <div class="faculty-attendance">
                 <h3 class="text-2xl font-bold mb-4">Faculty Attendance</h3>
-                <table>
+                <table class="min-w-full bg-white dark:bg-gray-700">
                     <thead>
-                        <tr>
-                            <th>Faculty</th>
+                        <tr class="bg-gray-200 dark:bg-gray-600">
+                            <th class="py-2">Faculty</th>
                             <th>Present Days</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for faculty in faculty_attendance %}
-                            <tr>
-                                <td>{{ faculty.name }}</td>
+                            <tr class="hover:bg-gray-100 dark:hover:bg-gray-600">
+                                <td class="py-2">{{ faculty.name }}</td>
                                 <td>{{ faculty.present_days }}</td>
                             </tr>
                         {% endfor %}
@@ -256,6 +274,9 @@
             </div>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         const darkModeToggle = document.getElementById('darkModeToggle');
         const body = document.body;
@@ -265,17 +286,19 @@
             updateChartColors();
         });
 
-        // Функция для создания анимации фона
         const backgroundAnimation = document.querySelector('.background-animation');
 
         function createCircle() {
             const circle = document.createElement('div');
             circle.classList.add('circle');
+            
             const size = Math.random() * 100 + 50;
             circle.style.width = `${size}px`;
             circle.style.height = `${size}px`;
+            
             circle.style.left = `${Math.random() * 100}%`;
             circle.style.top = `${Math.random() * 100}%`;
+            
             backgroundAnimation.appendChild(circle);
 
             anime({
@@ -297,7 +320,6 @@
             createCircle();
         }
 
-        // Анимация приветственного сообщения
         const username = document.getElementById('username');
         anime({
             targets: username,
@@ -307,7 +329,25 @@
             easing: 'easeOutExpo'
         });
 
-        // Чарт посещаемости
+        const button = document.querySelector('.btn');
+        button.addEventListener('mouseover', () => {
+            anime({
+                targets: button,
+                scale: 1.05,
+                duration: 300,
+                easing: 'easeOutExpo'
+            });
+        });
+
+        button.addEventListener('mouseout', () => {
+            anime({
+                targets: button,
+                scale: 1,
+                duration: 300,
+                easing: 'easeOutExpo'
+            });
+        });
+
         const ctx = document.getElementById('attendanceChart').getContext('2d');
         let attendanceChart;
 
@@ -350,7 +390,6 @@
 
         createChart();
 
-        // Анимация строк таблицы
         const tableRows = document.querySelectorAll('tr');
         tableRows.forEach(row => {
             row.addEventListener('mouseenter', () => {
