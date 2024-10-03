@@ -60,29 +60,9 @@ from geopy.distance import geodesic
 import requests
 import ipaddress
 
-def profile(request):
-    user = request.user
-    profile = getattr(user, 'profile', None)
 
-    if request.method == 'POST':
-        user_form = UserForm(request.POST, instance=user)
-        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
 
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
-            profile_form.save()
-            messages.success(request, 'Your profile was successfully updated!')
-            return redirect('profile')
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        user_form = UserForm(instance=user)
-        profile_form = ProfileForm(instance=profile)
 
-    return render(request, 'attendance/profile.html', {
-        'user_form': user_form,
-        'profile_form': profile_form
-    })
 
 def leaderboard(request):
     student_leaderboard = Student.objects.annotate(
@@ -359,6 +339,11 @@ def admin_dashboard(request):
     if not request.user.is_staff:
         return redirect('home')
 
+    # Получение общего количества студентов, преподавателей и факультетов
+    total_students = Student.objects.count()
+    total_teachers = Teacher.objects.count()
+    total_faculties = Faculty.objects.count()
+
     teachers = Teacher.objects.all().annotate(
         total_days=Count('user__attendance', distinct=True),
         present_days=Count('user__attendance', filter=Q(user__attendance__status='present')),
@@ -369,8 +354,10 @@ def admin_dashboard(request):
         present_days=Count('students__user__attendance', filter=Q(students__user__attendance__status='present'))
     ).order_by('-present_days')
 
-    # Кнопки для админ панели
     context = {
+        'total_students': total_students,
+        'total_teachers': total_teachers,
+        'total_faculties': total_faculties,
         'teachers': teachers,
         'faculties': Faculty.objects.all(),
         'faculty_attendance': faculty_attendance,
