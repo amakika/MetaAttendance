@@ -27,10 +27,15 @@ COLLEGE_LOCATION = (42.85765909539741, 74.59857798310655)  # Replace with your c
 def faculty_attendance(request, faculty_id):
     faculty = get_object_or_404(Faculty, id=faculty_id)
     students = Student.objects.filter(faculty=faculty)
+    
+    # Get the current day of the week and attendance filter option
     today = timezone.now().date()
-    filter_option = request.GET.get('filter', 'week')  # Default to week
+    current_day = today.strftime('%A')  # Example: 'Monday', 'Tuesday'
+    
+    filter_option = request.GET.get('filter', 'week')  # Default filter is 'week'
     start_date = today
 
+    # Adjust the start_date based on the selected filter
     if filter_option == 'week':
         start_date -= timedelta(days=7)
     elif filter_option == 'month':
@@ -38,22 +43,40 @@ def faculty_attendance(request, faculty_id):
     elif filter_option == 'year':
         start_date -= timedelta(days=365)
 
-    attendance_stats = {}
+    attendance_records = []
+    
+    # Loop through the students to get their attendance statuses
     for student in students:
-        stats = {
-            'present': Attendance.objects.filter(user=student.user, status='present', date__gte=start_date).count(),
-            'late': Attendance.objects.filter(user=student.user, status='late', date__gte=start_date).count(),
-            'absent': Attendance.objects.filter(user=student.user, status='absent', date__gte=start_date).count(),
-        }
-        attendance_stats[student] = stats
-
+        attendance = Attendance.objects.filter(user=student.user, date__gte=start_date).order_by('-date')
+        
+        # Color coding for attendance status
+        for record in attendance:
+            if record.status == 'present':
+                status_color = 'green'
+            elif record.status == 'absent':
+                status_color = 'red'
+            else:
+                status_color = 'orange'  # For 'late' or other statuses
+            
+            # Prepare attendance information for the table
+            attendance_records.append({
+                'student_name': student.user.username,
+                'status': record.status,
+                'status_color': status_color,
+                'date': record.date,
+                'day_of_week': record.date.strftime('%A')  # Day of the week
+            })
+    
     context = {
         'faculty': faculty,
-        'attendance_stats': attendance_stats,
+        'attendance_records': attendance_records,
         'students': students,
         'selected_filter': filter_option,
+        'current_day': current_day,  # Pass current day to template
     }
+    
     return render(request, 'attendance/faculty_attendance.html', context)
+
 
 
 # Attendance by hour view
@@ -95,7 +118,7 @@ def update_location(request):
                 if now <= time(10, 0):  # Before 10 AM
                     status = 'present'
                 else:
-                    status = 'late'
+                    status = 'absent'
 
             # Create or update attendance record for today
             Attendance.objects.update_or_create(
