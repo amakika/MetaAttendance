@@ -1,134 +1,109 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Фильтрация посещаемости</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <title>{{ faculty.name }} - Посещение</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #ff4136;
+            --secondary-color: #0074D9;
+            --background-color: #f0f0f0;
+            --text-color: #333;
+            --shadow-color: rgba(0, 0, 0, 0.1);
+        }
         body {
-            font-family: 'Roboto', sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
         }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
+        .navbar {
+            background-color: var(--background-color);
+            box-shadow: 5px 5px 10px var(--shadow-color);
         }
-        form {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
+        .table {
+            background-color: var(--background-color);
+            border-radius: 15px;
+            box-shadow: 5px 5px 10px var(--shadow-color);
         }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 500;
-        }
-        select, button {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        th, td {
-            text-align: left;
-            padding: 12px 15px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        th {
-            background-color: #f2f2f2;
-            font-weight: 500;
+        .table thead th {
+            background-color: var(--primary-color);
+            color: #ffffff;
             text-transform: uppercase;
-            font-size: 14px;
-            color: #2c3e50;
         }
-        tr:last-child td {
-            border-bottom: none;
+        .table-hover tbody tr:hover {
+            background-color: rgba(241, 248, 255, 0.1);
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        a {
-            display: inline-block;
-            margin-top: 20px;
-            color: #3498db;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        a:hover {
-            text-decoration: underline;
+        .faculty-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 1.5rem;
         }
     </style>
 </head>
+
 <body>
-    <h1>Фильтрация посещаемости</h1>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="fas fa-graduation-cap me-2"></i>Посещение колледжа
+            </a>
+            {% if user.is_authenticated %}
+                <span class="navbar-text">
+                    Добро пожаловать, {{ user.username }} | 
+                    <form method="post" action="{% url 'logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link p-0 text-danger">Выйти</button>
+                    </form>
+                </span>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-custom">
+                    <i class="fas fa-sign-in-alt me-2"></i>Войти
+                </a>
+            {% endif %}
+        </div>
+    </nav>
 
-    <form method="get">
-        <label for="gender">Пол:</label>
-        <select name="gender" id="gender">
-            <option value="">Все</option>
-            <option value="male" {% if selected_gender == "male" %}selected{% endif %}>Мужской</option>
-            <option value="female" {% if selected_gender == "female" %}selected{% endif %}>Женский</option>
-        </select>
+    <div class="container mt-5">
+        <h2 class="faculty-title mb-4">
+            <i class="fas fa-clipboard-list me-2"></i>Посещение для {{ faculty.name }}
+        </h2>
 
-        <label for="faculty">Факультет:</label>
-        <select name="faculty" id="faculty">
-            <option value="">Все факультеты</option>
-            {% for faculty in faculties %}
-            <option value="{{ faculty.id }}" {% if selected_faculty == faculty.id %}selected{% endif %}>{{ faculty.name }}</option>
-            {% endfor %}
-        </select>
+        <form method="get">
+            <label for="filter">Период:</label>
+            <select name="filter" id="filter" onchange="this.form.submit()">
+                <option value="week" {% if selected_filter == 'week' %}selected{% endif %}>Последняя неделя</option>
+                <option value="month" {% if selected_filter == 'month' %}selected{% endif %}>Последний месяц</option>
+                <option value="year" {% if selected_filter == 'year' %}selected{% endif %}>Последний год</option>
+            </select>
+        </form>
 
-        <button type="submit">Применить фильтр</button>
-    </form>
-
-    <table>
-        <thead>
-            <tr>
-                <th>Имя студента</th>
-                <th>Факультет</th>
-                <th>Статус посещаемости</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for attendance in attendance_records %}
-            <tr>
-                <td>{{ attendance.user.student.user.username }}</td>
-                <td>{{ attendance.user.student.faculty.name }}</td>
-                <td>{{ attendance.status }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{% url 'admin_dashboard' %}">← Назад к панели администратора</a>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-user me-2"></i>Имя студента</th>
+                        <th><i class="fas fa-check me-2"></i>Статус посещаемости</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attendance in attendance_records %}
+                        <tr>
+                            <td>{{ attendance.user.username }}</td> <!-- Здесь отображается имя студента -->
+                            <td>{{ attendance.status }}</td> <!-- Здесь отображается статус посещаемости -->
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="2">Нет записей о посещаемости.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
 </body>
 </html>
+
