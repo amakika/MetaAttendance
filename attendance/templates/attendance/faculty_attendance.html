@@ -92,8 +92,8 @@
                 <tbody>
                     {% for attendance in attendance_records %}
                         <tr>
-                            <td>{{ attendance.user.student.user.username }}</td>
-                            <td>{{ attendance.status }}</td>
+                            <td>{{ attendance.user.username }}</td> <!-- Здесь отображается имя студента -->
+                            <td>{{ attendance.status }}</td> <!-- Здесь отображается статус посещаемости -->
                         </tr>
                     {% empty %}
                         <tr>
