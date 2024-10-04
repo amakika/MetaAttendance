@@ -116,7 +116,6 @@ def faculty_attendance(request, faculty_id):
     }
     return render(request, 'attendance/faculty_attendance.html', context)
 
-
 # Leaderboard view
 def leaderboard(request):
     student_leaderboard = Student.objects.annotate(

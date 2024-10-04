@@ -84,6 +84,7 @@
         }
     </style>
 </head>
+</head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
@@ -133,17 +134,17 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for student, stats in attendance_stats.items %}
+                        {% for student in students %}
                             <tr>
-                                <td>{{ student.name }}</td>
+                                <td>{{ student.user.username }}</td>  <!-- Updated to display the username -->
                                 <td>
-                                    <input type="number" name="present_{{ student.id }}" value="{{ stats.present }}" class="form-control{% if stats.present < 0 %} error{% endif %}" min="0">
+                                    <input type="number" name="present_{{ student.id }}" value="{{ attendance_stats.student.id.present }}" class="form-control{% if attendance_stats.student.id.present < 0 %} error{% endif %}" min="0">
                                 </td>
                                 <td>
-                                    <input type="number" name="late_{{ student.id }}" value="{{ stats.late }}" class="form-control{% if stats.late < 0 %} error{% endif %}" min="0">
+                                    <input type="number" name="late_{{ student.id }}" value="{{ attendance_stats.student.id.late }}" class="form-control{% if attendance_stats.student.id.late < 0 %} error{% endif %}" min="0">
                                 </td>
                                 <td>
-                                    <input type="number" name="absent_{{ student.id }}" value="{{ stats.absent }}" class="form-control{% if stats.absent < 0 %} error{% endif %}" min="0">
+                                    <input type="number" name="absent_{{ student.id }}" value="{{ attendance_stats.student.id.absent }}" class="form-control{% if attendance_stats.student.id.absent < 0 %} error{% endif %}" min="0">
                                 </td>
                             </tr>
                         {% empty %}
@@ -184,4 +185,6 @@
         });
     </script>
 </body>
+</html>
+
 </html>
