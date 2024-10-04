@@ -3,39 +3,30 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.utils import timezone
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, JsonResponse
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.db.models import Count, Q
+from django.db.models import Count, Q, F
 from django.utils.translation import gettext as _
 from django.conf import settings
-from django.contrib import admin
-from django.contrib.admin.filters import SimpleListFilter
+from django.views.decorators.csrf import csrf_exempt
 from geopy.distance import geodesic
-import requests
-import ipaddress
+import json
+from datetime import datetime, time, timedelta
 
 from .models import Student, Teacher, Attendance, Faculty, Profile
 from .forms import UserForm, ProfileForm
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import json
-from .models import Student, Attendance
-from datetime import datetime, time
-from geopy.distance import geodesic
-from django.contrib.auth.decorators import login_required
-from datetime import datetime, timedelta
 
-from django.utils import timezone
-from datetime import timedelta
 
+# Helper: College location coordinates
+COLLEGE_LOCATION = (42.85765909539741, 74.59857798310655)  # Replace with your college's coordinates
+
+
+# Faculty attendance view
 @login_required
 def faculty_attendance(request, faculty_id):
     faculty = get_object_or_404(Faculty, id=faculty_id)
     students = Student.objects.filter(faculty=faculty)
-
-    # Get the current date and filter records based on the selection
     today = timezone.now().date()
     filter_option = request.GET.get('filter', 'week')  # Default to week
     start_date = today
@@ -65,60 +56,59 @@ def faculty_attendance(request, faculty_id):
     return render(request, 'attendance/faculty_attendance.html', context)
 
 
-COLLEGE_LOCATION = (42.85765909539741, 74.59857798310655)  # Replace with your college's coordinates
+# Attendance by hour view
 def attendance_by_hour(request):
-    # Assuming you are querying attendance records
     attendances = Attendance.objects.all()  # Get all attendance records
-    
     attendance_by_hour = {}
+
     for attendance in attendances:
-        # Access the instance attribute correctly
-        hour = timezone.localtime(attendance.time).hour  
-        
+        hour = timezone.localtime(attendance.time).hour  # Convert to local time and get the hour
         if hour not in attendance_by_hour:
             attendance_by_hour[hour] = 0  # Initialize the count
         attendance_by_hour[hour] += 1  # Increment the count for that hour
-    
-    # Add your logic for rendering the response
+
     return render(request, 'attendance/attendance_by_hour.html', {'attendance_by_hour': attendance_by_hour})
+
+
+# Update location and mark attendance view
 @csrf_exempt
 def update_location(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         latitude = data.get('latitude')
         longitude = data.get('longitude')
-        
+
         if request.user.is_authenticated:
             student = Student.objects.get(user=request.user)
             student.latitude = latitude
             student.longitude = longitude
             student.save()
-            
-            # Calculate distance
+
+            # Calculate distance to college
             student_location = (latitude, longitude)
             distance = geodesic(student_location, COLLEGE_LOCATION).meters
-            
-            # Determine status
-            now = datetime.now().time()
-            if distance <= 150:
-                if now <= time(10, 0):
-                    status = 'Присутствует'
+
+            # Determine attendance status based on distance and time
+            now = timezone.now().time()
+            status = 'absent'
+            if distance <= 150:  # Within 150 meters of the college
+                if now <= time(10, 0):  # Before 10 AM
+                    status = 'present'
                 else:
-                    status = 'опоздал'
-            else:
-                status = 'отстутствует'
-            
-            # Create attendance record
+                    status = 'late'
+
+            # Create or update attendance record for today
             Attendance.objects.update_or_create(
                 user=request.user,
-                date=datetime.now().date(),
+                date=timezone.now().date(),
                 defaults={'status': status}
             )
-            
+
             return JsonResponse({'status': 'success', 'attendance_status': status})
-    
     return JsonResponse({'status': 'error'}, status=400)
 
+
+# Attendance view for a student
 def attendance_view(request):
     if request.user.is_authenticated:
         student = Student.objects.get(user=request.user)
@@ -127,21 +117,17 @@ def attendance_view(request):
     return JsonResponse({'status': 'error'}, status=401)
 
 
+# View for displaying all teachers
 def all_teachers(request):
-    teachers = Teacher.objects.all()  # Adjust based on your logic
+    teachers = Teacher.objects.all()
     return render(request, 'attendance/all_teachers.html', {'teachers': teachers})
-
-# Helper function to calculate distance using geodesic
-
-
-# Attendance for a specific faculty
 
 
 # Leaderboard view
 def leaderboard(request):
     student_leaderboard = Student.objects.annotate(
-        absent_days=Count('user__attendance', filter=Q(user__attendance__status='absent'))
-    ).order_by('-absent_days')
+        points=Count('user__attendance', filter=Q(user__attendance__status='present'))
+    ).order_by('-points')
 
     faculty_filter = request.GET.get('faculty', None)
     student_filter = request.GET.get('student', None)
@@ -161,8 +147,6 @@ def leaderboard(request):
         'students': students,
     }
     return render(request, 'attendance/leaderboard.html', context)
-
-# Mark attendance view
 
 
 # Home view for students and teachers
@@ -214,6 +198,7 @@ def home(request):
     else:
         return render(request, 'attendance/error.html', {'message': 'User type not recognized'})
 
+
 # Admin dashboard view
 @login_required
 def admin_dashboard(request):
@@ -244,6 +229,7 @@ def admin_dashboard(request):
     }
     return render(request, 'attendance/admin_dashboard.html', context)
 
+
 # Profile management view
 @login_required
 def profile(request):
@@ -271,6 +257,7 @@ def profile(request):
     }
     return render(request, 'attendance/profile.html', context)
 
+
 # Login view
 def login_view(request):
     if request.method == 'POST':
@@ -283,8 +270,6 @@ def login_view(request):
         else:
             messages.error(request, 'Invalid username or password')
     return render(request, 'attendance/login.html')
-
-# Add Student view
 @login_required
 def add_student(request):
     if not request.user.is_staff:
