@@ -85,74 +85,69 @@
     </style>
 </head>
 
-
-
-    <body>
-        <nav class="navbar navbar-expand-lg navbar-light">
-            <div class="container">
-                <a class="navbar-brand" href="{% url 'home' %}">
-                    <i class="fas fa-graduation-cap me-2"></i>Посещение колледжа
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="fas fa-graduation-cap me-2"></i>Посещение колледжа
+            </a>
+            {% if user.is_authenticated %}
+                <span class="navbar-text">
+                    Добро пожаловать, {{ user.username }} | 
+                    <form method="post" action="{% url 'logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link p-0 text-danger">Выйти</button>
+                    </form>
+                </span>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-custom">
+                    <i class="fas fa-sign-in-alt me-2"></i>Войти
                 </a>
-                {% if user.is_authenticated %}
-                    <span class="navbar-text">
-                        Добро пожаловать, {{ user.username }} | 
-                        <form method="post" action="{% url 'logout' %}" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-link p-0 text-danger">Выйти</button>
-                        </form>
-                    </span>
-                {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-custom">
-                        <i class="fas fa-sign-in-alt me-2"></i>Войти
-                    </a>
-                {% endif %}
-            </div>
-        </nav>
-    
-        <div class="container mt-5">
-            <h2 class="faculty-title mb-4">
-                <i class="fas fa-clipboard-list me-2"></i>Посещение для {{ faculty.name }}
-            </h2>
-    
-            <form method="get">
-                <label for="filter">Период:</label>
-                <select name="filter" id="filter" onchange="this.form.submit()">
-                    <option value="week" {% if selected_filter == 'week' %}selected{% endif %}>Последняя неделя</option>
-                    <option value="month" {% if selected_filter == 'month' %}selected{% endif %}>Последний месяц</option>
-                    <option value="year" {% if selected_filter == 'year' %}selected{% endif %}>Последний год</option>
-                </select>
-            </form>
-    
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th><i class="fas fa-user me-2"></i>Студент</th>
-                            <th><i class="fas fa-check me-2"></i>Присутствует</th>
-                            <th><i class="fas fa-clock me-2"></i>Опоздал</th>
-                            <th><i class="fas fa-times me-2"></i>Отсутствует</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for student, stats in attendance_stats.items %}
-                            <tr>
-                                <td>{{ student.user.username }}</td>
-                                <td>{{ stats.present }}</td>
-                                <td>{{ stats.late }}</td>
-                                <td>{{ stats.absent }}</td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td colspan="4">Нет студентов для отображения.</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            {% endif %}
         </div>
-    </body>
-    
+    </nav>
 
+    <div class="container mt-5">
+        <h2 class="faculty-title mb-4">
+            <i class="fas fa-clipboard-list me-2"></i>Посещение для {{ faculty.name }}
+        </h2>
+
+        <form method="get">
+            <label for="filter">Период:</label>
+            <select name="filter" id="filter" onchange="this.form.submit()">
+                <option value="week" {% if selected_filter == 'week' %}selected{% endif %}>Последняя неделя</option>
+                <option value="month" {% if selected_filter == 'month' %}selected{% endif %}>Последний месяц</option>
+                <option value="year" {% if selected_filter == 'year' %}selected{% endif %}>Последний год</option>
+            </select>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-user me-2"></i>Имя студента</th>
+                        <th><i class="fas fa-check me-2"></i>Присутствует</th>
+                        <th><i class="fas fa-clock me-2"></i>Опоздал</th>
+                        <th><i class="fas fa-times me-2"></i>Отсутствует</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student, stats in attendance_stats.items %}
+                        <tr>
+                            <td>{{ student.user.username }}</td>
+                            <td>{{ stats.present }}</td>
+                            <td>{{ stats.late }}</td>
+                            <td>{{ stats.absent }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="4">Нет студентов для отображения.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
 </html>
-
 
