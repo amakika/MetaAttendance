@@ -102,11 +102,11 @@ def update_location(request):
             now = datetime.now().time()
             if distance <= 150:
                 if now <= time(10, 0):
-                    status = 'present'
+                    status = 'Присутствует'
                 else:
-                    status = 'late'
+                    status = 'опоздал'
             else:
-                status = 'absent'
+                status = 'отстутствует'
             
             # Create attendance record
             Attendance.objects.update_or_create(
