@@ -18,6 +18,13 @@ import dj_database_url
 
 
 
+# Получаем DATABASE_URL из переменных окружения
+DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://postgres:CZPKkrpgFndkJhMZSMMweYQNhmAyBquJ@postgres.railway.internal:5432/railway')
+
+DATABASES = {
+    'default': dj_database_url.config(default=DATABASE_URL)
+}
+
 # Путь к корню вашего проекта
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -51,16 +58,7 @@ ALLOWED_HOSTS = [
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = True
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': 'postgres',
-        'PASSWORD': 'CZPKkrpgFndkJhMZSMMweYQNhmAyBquJ',
-        'HOST': 'postgres.railway.internal',
-        'PORT': '5432',
-    }
-}
+
 
 # Application definition
 
