@@ -24,8 +24,46 @@ import json
 from .models import Student, Attendance
 from datetime import datetime, time
 from geopy.distance import geodesic
+from django.contrib.auth.decorators import login_required
+from datetime import datetime, timedelta
 
-COLLEGE_LOCATION = (52.5200, 13.4050)  # Replace with your college's coordinates
+@login_required
+def faculty_attendance(request, faculty_id):
+    faculty = get_object_or_404(Faculty, id=faculty_id)
+    students = Student.objects.filter(faculty=faculty)
+
+    # Default to a weekly view
+    filter_option = request.GET.get('filter', 'week')
+    today = datetime.now()
+    start_date = today
+    end_date = today
+
+    if filter_option == 'week':
+        start_date = today - timedelta(days=today.weekday())
+    elif filter_option == 'month':
+        start_date = today.replace(day=1)
+    elif filter_option == 'year':
+        start_date = today.replace(month=1, day=1)
+
+    # Get attendance records for the specified date range
+    attendance_records = Attendance.objects.filter(user__in=students.values('user'), date__range=(start_date, end_date))
+
+    attendance_stats = {}
+    for student in students:
+        stats = {
+            'attendance': attendance_records.filter(user=student.user).values('date', 'status'),
+        }
+        attendance_stats[student] = stats
+
+    context = {
+        'faculty': faculty,
+        'attendance_stats': attendance_stats,
+        'students': students,
+        'filter_option': filter_option,
+    }
+    return render(request, 'attendance/faculty_attendance.html', context)
+
+COLLEGE_LOCATION = (42.85765909539741, 74.59857798310655)  # Replace with your college's coordinates
 def attendance_by_hour(request):
     # Assuming you are querying attendance records
     attendances = Attendance.objects.all()  # Get all attendance records
@@ -95,26 +133,7 @@ def all_teachers(request):
 
 
 # Attendance for a specific faculty
-@login_required
-def faculty_attendance(request, faculty_id):
-    faculty = get_object_or_404(Faculty, id=faculty_id)
-    students = Student.objects.filter(faculty=faculty)
 
-    attendance_stats = {}
-    for student in students:
-        stats = {
-            'present': Attendance.objects.filter(user=student.user, status='present').count(),
-            'late': Attendance.objects.filter(user=student.user, status='late').count(),
-            'absent': Attendance.objects.filter(user=student.user, status='absent').count(),
-        }
-        attendance_stats[student] = stats
-
-    context = {
-        'faculty': faculty,
-        'attendance_stats': attendance_stats,
-        'students': students,
-    }
-    return render(request, 'attendance/faculty_attendance.html', context)
 
 # Leaderboard view
 def leaderboard(request):

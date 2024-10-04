@@ -84,7 +84,8 @@
         }
     </style>
 </head>
-</head>
+
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
@@ -108,18 +109,20 @@
     </nav>
 
     <div class="container mt-5">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-
         <h2 class="faculty-title mb-4">
             <i class="fas fa-clipboard-list me-2"></i>{{ faculty.name }} Attendance
         </h2>
+
+        <div class="mb-3">
+            <form method="get" action="{% url 'faculty_attendance' faculty.id %}">
+                <label for="filter" class="form-label">Filter by:</label>
+                <select name="filter" id="filter" class="form-select" onchange="this.form.submit();">
+                    <option value="week" {% if filter_option == 'week' %}selected{% endif %}>This Week</option>
+                    <option value="month" {% if filter_option == 'month' %}selected{% endif %}>This Month</option>
+                    <option value="year" {% if filter_option == 'year' %}selected{% endif %}>This Year</option>
+                </select>
+            </form>
+        </div>
 
         <form method="post" action="{% url 'faculty_attendance' faculty.id %}" onsubmit="return confirm('Are you sure you want to save changes?');">
             {% csrf_token %}
@@ -128,28 +131,24 @@
                     <thead>
                         <tr>
                             <th><i class="fas fa-user me-2"></i>Student</th>
-                            <th><i class="fas fa-check me-2"></i>Present</th>
-                            <th><i class="fas fa-clock me-2"></i>Late</th>
-                            <th><i class="fas fa-times me-2"></i>Absent</th>
+                            {% for record in attendance_stats.values.0.attendance %}
+                                <th>{{ record.date }}</th>
+                            {% endfor %}
                         </tr>
                     </thead>
                     <tbody>
-                        {% for student in students %}
+                        {% for student, stats in attendance_stats.items %}
                             <tr>
-                                <td>{{ student.user.username }}</td>  <!-- Updated to display the username -->
-                                <td>
-                                    <input type="number" name="present_{{ student.id }}" value="{{ attendance_stats.student.id.present }}" class="form-control{% if attendance_stats.student.id.present < 0 %} error{% endif %}" min="0">
-                                </td>
-                                <td>
-                                    <input type="number" name="late_{{ student.id }}" value="{{ attendance_stats.student.id.late }}" class="form-control{% if attendance_stats.student.id.late < 0 %} error{% endif %}" min="0">
-                                </td>
-                                <td>
-                                    <input type="number" name="absent_{{ student.id }}" value="{{ attendance_stats.student.id.absent }}" class="form-control{% if attendance_stats.student.id.absent < 0 %} error{% endif %}" min="0">
-                                </td>
+                                <td>{{ student.user.username }}</td>
+                                {% for record in stats.attendance %}
+                                    <td>
+                                        <input type="text" name="attendance_{{ student.id }}_{{ record.date }}" value="{{ record.status }}" class="form-control" readonly>
+                                    </td>
+                                {% endfor %}
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="4">Нет студентов для отображения.</td>
+                                <td colspan="5">Нет студентов для отображения.</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -187,4 +186,4 @@
 </body>
 </html>
 
-</html>
+
