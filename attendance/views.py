@@ -124,30 +124,17 @@ def all_teachers(request):
 
 
 # Leaderboard view
+
 def leaderboard(request):
+    # Аннотация для подсчета дней присутствия
     student_leaderboard = Student.objects.annotate(
-        points=Count('user__attendance', filter=Q(user__attendance__status='present'))
-    ).order_by('-points')
-
-    faculty_filter = request.GET.get('faculty', None)
-    student_filter = request.GET.get('student', None)
-
-    if faculty_filter:
-        student_leaderboard = student_leaderboard.filter(faculty__id=faculty_filter)
-
-    if student_filter:
-        student_leaderboard = student_leaderboard.filter(id=student_filter)
-
-    faculties = Faculty.objects.all()
-    students = Student.objects.all()
+        present_days=Count('user__attendance', filter=Q(user__attendance__status='present'))
+    ).order_by('-present_days')
 
     context = {
         'student_leaderboard': student_leaderboard,
-        'faculties': faculties,
-        'students': students,
     }
     return render(request, 'attendance/leaderboard.html', context)
-
 
 # Home view for students and teachers
 @login_required
