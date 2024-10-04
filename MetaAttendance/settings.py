@@ -15,15 +15,16 @@ from django.utils.translation import gettext_lazy as _
 import os
 import os
 import dj_database_url
+import dj_database_url
 
-
-
-# Получаем DATABASE_URL из переменных окружения
-DATABASE_URL = os.getenv('DATABASE_URL', 'postgresql://postgres:CZPKkrpgFndkJhMZSMMweYQNhmAyBquJ@postgres.railway.internal:5432/railway')
+import dj_database_url
 
 DATABASES = {
-    'default': dj_database_url.config(default=DATABASE_URL)
+    'default': dj_database_url.config(
+        default='postgresql://postgres:CZPKkrpgFndkJhMZSMMweYQNhmAyBquJ@postgres.railway.internal:5432/railway'
+    )
 }
+
 
 # Путь к корню вашего проекта
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
