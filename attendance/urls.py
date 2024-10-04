@@ -25,4 +25,4 @@ urlpatterns = [
     path('filter-attendance/', views.filter_attendance, name='filter_attendance'),
     path('delete-attendance/<int:attendance_id>/', views.delete_attendance, name='delete_attendance'),
     path('set-language/', views.set_language_view, name='set_language'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
