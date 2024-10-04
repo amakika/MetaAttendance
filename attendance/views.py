@@ -26,7 +26,21 @@ from datetime import datetime, time
 from geopy.distance import geodesic
 
 COLLEGE_LOCATION = (52.5200, 13.4050)  # Replace with your college's coordinates
-
+def attendance_by_hour(request):
+    # Assuming you are querying attendance records
+    attendances = Attendance.objects.all()  # Get all attendance records
+    
+    attendance_by_hour = {}
+    for attendance in attendances:
+        # Access the instance attribute correctly
+        hour = timezone.localtime(attendance.time).hour  
+        
+        if hour not in attendance_by_hour:
+            attendance_by_hour[hour] = 0  # Initialize the count
+        attendance_by_hour[hour] += 1  # Increment the count for that hour
+    
+    # Add your logic for rendering the response
+    return render(request, 'your_template.html', {'attendance_by_hour': attendance_by_hour})
 @csrf_exempt
 def update_location(request):
     if request.method == 'POST':
@@ -529,17 +543,7 @@ def delete_faculty(request, faculty_id):
     return render(request, 'attendance/delete_faculty.html', context)
 
 # Attendance by hour view
-@login_required
-def attendance_by_hour(request):
-    """Group attendance by hour"""
-    attendance_by_hour = Attendance.objects.annotate(
-        hour=timezone.localtime(Attendance.time).hour
-    ).values('hour').annotate(count=Count('id')).order_by('hour')
 
-    context = {
-        'attendance_by_hour': attendance_by_hour
-    }
-    return render(request, 'attendance/attendance_by_hour.html', context)
 
 # Filter attendance view
 @login_required
