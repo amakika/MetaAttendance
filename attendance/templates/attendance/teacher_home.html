@@ -94,14 +94,7 @@
     <div class="container mx-auto px-4 py-8">
         <h2 class="text-4xl font-bold mb-8 text-center fade-in">Добро пожаловать, {{ user.username }}</h2>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Профиль преподавателя -->
-            <div class="card fade-in">
-                <h3 class="text-2xl font-bold mb-4">Информация о профиле</h3>
-                <p><strong>Имя:</strong> {{ user.first_name }} {{ user.last_name }}</p>
-                <p><strong>Email:</strong> {{ user.email }}</p>
-            </div>
-
+     
             <div class="card fade-in">
                 <h3 class="text-2xl font-bold mb-4">Записи о посещаемости</h3>
                 <div class="overflow-x-auto">
