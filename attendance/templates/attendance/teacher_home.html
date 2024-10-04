@@ -1,148 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Home</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Attendance Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-red: #8B0000;
-            --secondary-red: #FF4136;
-            --accent-color: #FFD700;
-            --text-light: #FFFFFF;
-            --text-dark: #333333;
+            --primary-color: #ff4136;
+            --secondary-color: #0074D9;
+            --background-color: #f0f0f0;
+            --text-color: #333;
+            --shadow-color: rgba(0, 0, 0, 0.1);
         }
-
         body {
-            background-color: #F8F8F8;
-            color: var(--text-dark);
-            font-family: 'Arial', sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
         }
-
-        body.dark-mode {
-            background-color: #333333;
-            color: var(--text-light);
+        .navbar {
+            background-color: var(--background-color);
+            box-shadow: 5px 5px 10px var(--shadow-color);
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
+        .table {
+            background-color: var(--background-color);
+            border-radius: 15px;
+            box-shadow: 5px 5px 10px var(--shadow-color);
         }
-
-        h2, h3 {
-            color: var(--primary-red);
+        .table thead th {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            text-transform: uppercase;
         }
-
-        .card {
-            background-color: #FFFFFF;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            padding: 1.5rem;
+        .table-hover tbody tr:hover {
+            background-color: rgba(241, 248, 255, 0.1);
+        }
+        .faculty-title {
+            color: var(--primary-color);
+            font-weight: 600;
             margin-bottom: 1.5rem;
         }
-
+        .card {
+            padding: 1.5rem;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
         .btn-primary {
-            background-color: var(--primary-red);
-            color: var(--text-light);
-            padding: 0.5rem 1rem;
-            border-radius: 4px;
+            background-color: var(--primary-color);
+            color: white;
             border: none;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+            padding: 10px 15px;
+            border-radius: 5px;
         }
-
-        .btn-primary:hover {
-            background-color: var(--secondary-red);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        th, td {
-            padding: 0.75rem;
-            text-align: left;
-        }
-
-        thead {
-            background-color: var(--primary-red);
-            color: var(--text-light);
-        }
-
-        tbody tr:nth-child(even) {
-            background-color: #F3F3F3;
-        }
-
         .delete-btn {
-            color: var(--secondary-red);
-            cursor: pointer;
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
         }
-
-        .delete-btn:hover {
-            text-decoration: underline;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        .leaderboard-rank {
-            font-weight: bold;
-            color: var(--accent-color);
+        .dark-mode {
+            background-color: #1a1a1a;
+            color: #ffffff;
         }
     </style>
 </head>
+
 <body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="fas fa-graduation-cap me-2"></i>Посещение колледжа
+            </a>
+            {% if user.is_authenticated %}
+                <span class="navbar-text">
+                    Добро пожаловать, {{ user.username }} | 
+                    <form method="post" action="{% url 'logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-link p-0 text-danger">Выйти</button>
+                    </form>
+                </span>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-custom">
+                    <i class="fas fa-sign-in-alt me-2"></i>Войти
+                </a>
+            {% endif %}
+        </div>
+    </nav>
+
     <div class="container mx-auto px-4 py-8">
-        <h2 class="text-4xl font-bold mb-8 text-center fade-in">Welcome, {{ user.username }}</h2>
+        <h2 class="text-4xl font-bold mb-8 text-center fade-in">Добро пожаловать, {{ user.username }}</h2>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <!-- Профиль преподавателя -->
             <div class="card fade-in">
-                <h3 class="text-2xl font-bold mb-4">Profile Information</h3>
-                <p><strong>Name:</strong> {{ user.first_name }} {{ user.last_name }}</p>
+                <h3 class="text-2xl font-bold mb-4">Информация о профиле</h3>
+                <p><strong>Имя:</strong> {{ user.first_name }} {{ user.last_name }}</p>
                 <p><strong>Email:</strong> {{ user.email }}</p>
             </div>
 
             <div class="card fade-in">
-                <h3 class="text-2xl font-bold mb-4">Mark Attendance</h3>
-                <form method="post" action="{% url 'mark_attendance_for_student' %}" class="mb-4">
-                    {% csrf_token %}
-                    <label for="student_id" class="block text-sm font-medium mb-2">Select Student:</label>
-                    <select name="student_id" id="student_id" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-                        {% for student in students %}
-                        <option value="{{ student.id }}">{{ student.user.username }}</option>
-                        {% endfor %}
-                    </select>
-                    <label for="status" class="block text-sm font-medium mb-2">Status:</label>
-                    <select name="status" id="status" required class="w-full p-2 mb-4 border border-gray-300 rounded">
-                        <option value="present">Present</option>
-                        <option value="late">Late</option>
-                        <option value="absent">Absent</option>
-                    </select>
-                    <button type="submit" class="btn-primary w-full">Mark Attendance</button>
-                </form>
-            </div>
-
-            <div class="card fade-in">
-                <h3 class="text-2xl font-bold mb-4">Attendance Records</h3>
+                <h3 class="text-2xl font-bold mb-4">Записи о посещаемости</h3>
                 <div class="overflow-x-auto">
-                    <table>
+                    <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Student</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Actions</th>
+                                <th>Студент</th>
+                                <th>Статус</th>
+                                <th>Дата</th>
+                                <th>Действия</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -154,13 +123,13 @@
                                 <td>
                                     <form method="post" action="{% url 'delete_attendance' record.id %}">
                                         {% csrf_token %}
-                                        <button type="submit" class="delete-btn">Delete</button>
+                                        <button type="submit" class="delete-btn">Удалить</button>
                                     </form>
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="4" class="text-center">No attendance records found.</td>
+                                <td colspan="4" class="text-center">Записи о посещаемости не найдены.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -169,14 +138,14 @@
             </div>
 
             <div class="card fade-in">
-                <h3 class="text-2xl font-bold mb-4">Leaderboard</h3>
+                <h3 class="text-2xl font-bold mb-4">Таблица лидеров</h3>
                 <div class="overflow-x-auto">
-                    <table>
+                    <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Rank</th>
-                                <th>Student</th>
-                                <th>Present Days</th>
+                                <th>Ранг</th>
+                                <th>Студент</th>
+                                <th>Дни присутствия</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -193,13 +162,13 @@
             </div>
 
             <div class="card fade-in">
-                <h3 class="text-2xl font-bold mb-4">Faculty Attendance</h3>
+                <h3 class="text-2xl font-bold mb-4">Посещаемость по факультету</h3>
                 <div class="overflow-x-auto">
-                    <table>
+                    <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Faculty</th>
-                                <th>Present Days</th>
+                                <th>Факультет</th>
+                                <th>Дни присутствия</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -219,7 +188,7 @@
     <div class="text-center mb-4">
         <label class="inline-flex items-center">
             <input type="checkbox" id="darkModeToggle" class="mr-2">
-            <span class="text-sm">Dark Mode</span>
+            <span class="text-sm">Темный режим</span>
         </label>
     </div>
 
@@ -230,7 +199,7 @@
                 el.style.animationDelay = `${index * 0.1}s`;
             });
 
-            // Dark mode toggle
+            // Темный режим
             const darkModeToggle = document.getElementById('darkModeToggle');
             darkModeToggle.addEventListener('change', () => {
                 document.body.classList.toggle('dark-mode');
