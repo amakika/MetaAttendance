@@ -13,20 +13,9 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 from django.utils.translation import gettext_lazy as _
 import os
-import os
-import dj_database_url
 import dj_database_url
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # Указываем, что будем использовать PostgreSQL
-        'NAME': 'railway',  # Имя базы данных
-        'USER': 'postgres',  # Имя пользователя
-        'PASSWORD': 'CZPKkrpgFndkJhMZSMMweYQNhmAyBquJ',  # Ваш пароль
-        'HOST': 'postgres.railway.internal',  # Внутренний хост на Railway
-        'PORT': '5432',  # Порт по умолчанию
-    }
-} 
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # URL для доступа к загруженным медиафайлам
@@ -112,6 +101,14 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
+
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default='postgresql://postgres:CZPKkrpgFndkJhMZSMMweYQNhmAyBquJ@autorack.proxy.rlwy.net:41006/railway'
+    )
+}
 
 
 

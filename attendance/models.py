@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from .subject_models import Subject
+
 class Faculty(models.Model):
     name = models.CharField(max_length=100)
 
@@ -27,7 +28,12 @@ class Student(models.Model):
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='students')
     latitude = models.FloatField(default=0.0)
     longitude = models.FloatField(default=0.0)
-    status = models.CharField(max_length=10, choices=[('present', 'Present'), ('absent', 'Absent'), ('late', 'Late')], blank=True)
+    # Updated max_length to 20 to accommodate longer statuses if needed
+    status = models.CharField(max_length=20, choices=[
+        ('present', 'Present'), 
+        ('absent', 'Absent'), 
+        ('late', 'Late')
+    ], blank=True)
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE, null=True, blank=True)
     check_in_time = models.TimeField(null=True, blank=True)
 
@@ -57,6 +63,7 @@ class Attendance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)
     time = models.TimeField(auto_now_add=True)
+    # This field can accommodate longer statuses
     status = models.CharField(max_length=20, choices=[
         ('present', 'Present'),
         ('late', 'Late'),
