@@ -250,7 +250,52 @@
     </div>
 
     <script>
-    // ... (оставьте JavaScript код без изменений)
-    </script>
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(sendPosition, showError);
+    } else {
+        alert("Геолокация не поддерживается этим браузером.");
+    }
+}
+
+function sendPosition(position) {
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+
+    fetch('/update-location/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ latitude: lat, longitude: lon })
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Присутствие отмечено: ' + data.attendance_status);
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка при отметке присутствия.');
+    });
+}
+
+function showError(error) {
+    switch(error.code) {
+        case error.PERMISSION_DENIED:
+            alert("Пользователь отклонил запрос на геолокацию.");
+            break;
+        case error.POSITION_UNAVAILABLE:
+            alert("Информация о местоположении недоступна.");
+            break;
+        case error.TIMEOUT:
+            alert("Время ожидания запроса на получение местоположения истекло.");
+            break;
+        case error.UNKNOWN_ERROR:
+            alert("Произошла неизвестная ошибка.");
+            break;
+    }
+}
+</script>
 </body>
 </html>
