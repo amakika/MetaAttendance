@@ -14,6 +14,9 @@
             --background-color: #f0f0f0;
             --text-color: #333;
             --shadow-color: rgba(0, 0, 0, 0.1);
+            --present-color: #2ecc40; /* Зеленый */
+            --late-color: #ffa500; /* Оранжевый */
+            --absent-color: #ff4136; /* Красный */
         }
         body {
             font-family: 'Poppins', sans-serif;
@@ -42,21 +45,30 @@
             font-weight: 600;
             margin-bottom: 1.5rem;
         }
-        .attendance-status-green {
-            background-color: #28a745; /* Зеленый для присутствующих */
-            color: white;
+        .attendance-square {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            border-radius: 4px;
         }
-        .attendance-status-red {
-            background-color: #dc3545; /* Красный для отсутствующих */
-            color: white;
+        .present {
+            background-color: var(--present-color);
         }
-        .attendance-status-orange {
-            background-color: #fd7e14; /* Оранжевый для опоздавших */
-            color: white;
+        .late {
+            background-color: var(--late-color);
         }
-        .day-of-week {
+        .absent {
+            background-color: var(--absent-color);
+        }
+        .days-of-week {
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .day-header {
             font-weight: bold;
-            color: var(--secondary-color);
+            text-align: center;
+            padding: 10px;
         }
     </style>
 </head>
@@ -88,38 +100,35 @@
             <i class="fas fa-clipboard-list me-2"></i>Посещение для {{ faculty.name }}
         </h2>
 
-        <!-- Фильтр для выбора периода -->
-        <form method="get">
-            <label for="filter">Период:</label>
-            <select name="filter" id="filter" onchange="this.form.submit()">
-                <option value="week" {% if selected_filter == 'week' %}selected{% endif %}>Последняя неделя</option>
-                <option value="month" {% if selected_filter == 'month' %}selected{% endif %}>Последний месяц</option>
-                <option value="year" {% if selected_filter == 'year' %}selected{% endif %}>Последний год</option>
-            </select>
-        </form>
+        <div class="days-of-week">
+            {% for day in days_of_week %}
+                <div class="day-header">{{ day }}</div>
+            {% endfor %}
+        </div>
 
-        <!-- Таблица посещаемости -->
-        <div class="table-responsive mt-4">
+        <div class="table-responsive">
             <table class="table table-hover">
                 <thead>
                     <tr>
                         <th><i class="fas fa-user me-2"></i>Имя студента</th>
-                        <th><i class="fas fa-calendar-alt me-2"></i>День недели</th>
-                        <th><i class="fas fa-check me-2"></i>Статус посещаемости</th>
+                        {% for day in days_of_week %}
+                            <th>{{ day }}</th>
+                        {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
-                    {% for record in attendance_records %}
+                    {% for student, attendance in attendance_stats.items %}
                         <tr>
-                            <td>{{ record.student_name }}</td> <!-- Имя студента -->
-                            <td class="day-of-week">{{ record.day_of_week }}</td> <!-- День недели -->
-                            <td class="{% if record.status_color == 'green' %}attendance-status-green{% elif record.status_color == 'red' %}attendance-status-red{% else %}attendance-status-orange{% endif %}">
-                                {{ record.status }}
-                            </td> <!-- Статус с цветом -->
+                            <td>{{ student.user.username }}</td>
+                            {% for status in attendance %}
+                                <td>
+                                    <div class="attendance-square {% if status == 'present' %}present{% elif status == 'late' %}late{% else %}absent{% endif %}"></div>
+                                </td>
+                            {% endfor %}
                         </tr>
                     {% empty %}
                         <tr>
-                            <td colspan="3">Нет записей о посещаемости.</td>
+                            <td colspan="8">Нет данных о посещаемости.</td>
                         </tr>
                     {% endfor %}
                 </tbody>
