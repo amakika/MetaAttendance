@@ -30,8 +30,8 @@ def calculate_distance(user_location, college_location):
 def faculty_attendance(request, faculty_id):
     faculty = get_object_or_404(Faculty, id=faculty_id)
     students = Student.objects.filter(faculty=faculty)
-    attendance_stats = {}
 
+    attendance_stats = {}
     for student in students:
         stats = {
             'present': Attendance.objects.filter(user=student.user, status='present').count(),
@@ -46,6 +46,7 @@ def faculty_attendance(request, faculty_id):
         'students': students,
     }
     return render(request, 'attendance/faculty_attendance.html', context)
+
 
 # Leaderboard view
 def leaderboard(request):
