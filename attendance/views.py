@@ -27,31 +27,32 @@ from geopy.distance import geodesic
 from django.contrib.auth.decorators import login_required
 from datetime import datetime, timedelta
 
+from django.utils import timezone
+from datetime import timedelta
+
 @login_required
 def faculty_attendance(request, faculty_id):
     faculty = get_object_or_404(Faculty, id=faculty_id)
     students = Student.objects.filter(faculty=faculty)
 
-    # Default to a weekly view
-    filter_option = request.GET.get('filter', 'week')
-    today = datetime.now()
+    # Get the current date and filter records based on the selection
+    today = timezone.now().date()
+    filter_option = request.GET.get('filter', 'week')  # Default to week
     start_date = today
-    end_date = today
 
     if filter_option == 'week':
-        start_date = today - timedelta(days=today.weekday())
+        start_date -= timedelta(days=7)
     elif filter_option == 'month':
-        start_date = today.replace(day=1)
+        start_date -= timedelta(days=30)
     elif filter_option == 'year':
-        start_date = today.replace(month=1, day=1)
-
-    # Get attendance records for the specified date range
-    attendance_records = Attendance.objects.filter(user__in=students.values('user'), date__range=(start_date, end_date))
+        start_date -= timedelta(days=365)
 
     attendance_stats = {}
     for student in students:
         stats = {
-            'attendance': attendance_records.filter(user=student.user).values('date', 'status'),
+            'present': Attendance.objects.filter(user=student.user, status='present', date__gte=start_date).count(),
+            'late': Attendance.objects.filter(user=student.user, status='late', date__gte=start_date).count(),
+            'absent': Attendance.objects.filter(user=student.user, status='absent', date__gte=start_date).count(),
         }
         attendance_stats[student] = stats
 
@@ -59,9 +60,10 @@ def faculty_attendance(request, faculty_id):
         'faculty': faculty,
         'attendance_stats': attendance_stats,
         'students': students,
-        'filter_option': filter_option,
+        'selected_filter': filter_option,
     }
     return render(request, 'attendance/faculty_attendance.html', context)
+
 
 COLLEGE_LOCATION = (42.85765909539741, 74.59857798310655)  # Replace with your college's coordinates
 def attendance_by_hour(request):

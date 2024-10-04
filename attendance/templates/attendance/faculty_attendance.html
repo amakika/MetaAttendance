@@ -86,104 +86,73 @@
 </head>
 
 
-<body>
-    <nav class="navbar navbar-expand-lg navbar-light">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">
-                <i class="fas fa-graduation-cap me-2"></i>College Attendance
-            </a>
-            {% if user.is_authenticated %}
-                <span class="navbar-text">
-                    Welcome, {{ user.username }} | 
-                    <form method="post" action="{% url 'logout' %}" class="d-inline">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-link p-0 text-danger">Logout</button>
-                    </form>
-                </span>
-            {% else %}
-                <a href="{% url 'login' %}" class="btn btn-custom">
-                    <i class="fas fa-sign-in-alt me-2"></i>Login
+
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'home' %}">
+                    <i class="fas fa-graduation-cap me-2"></i>Посещение колледжа
                 </a>
-            {% endif %}
-        </div>
-    </nav>
-
-    <div class="container mt-5">
-        <h2 class="faculty-title mb-4">
-            <i class="fas fa-clipboard-list me-2"></i>{{ faculty.name }} Attendance
-        </h2>
-
-        <div class="mb-3">
-            <form method="get" action="{% url 'faculty_attendance' faculty.id %}">
-                <label for="filter" class="form-label">Filter by:</label>
-                <select name="filter" id="filter" class="form-select" onchange="this.form.submit();">
-                    <option value="week" {% if filter_option == 'week' %}selected{% endif %}>This Week</option>
-                    <option value="month" {% if filter_option == 'month' %}selected{% endif %}>This Month</option>
-                    <option value="year" {% if filter_option == 'year' %}selected{% endif %}>This Year</option>
+                {% if user.is_authenticated %}
+                    <span class="navbar-text">
+                        Добро пожаловать, {{ user.username }} | 
+                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-link p-0 text-danger">Выйти</button>
+                        </form>
+                    </span>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-custom">
+                        <i class="fas fa-sign-in-alt me-2"></i>Войти
+                    </a>
+                {% endif %}
+            </div>
+        </nav>
+    
+        <div class="container mt-5">
+            <h2 class="faculty-title mb-4">
+                <i class="fas fa-clipboard-list me-2"></i>Посещение для {{ faculty.name }}
+            </h2>
+    
+            <form method="get">
+                <label for="filter">Период:</label>
+                <select name="filter" id="filter" onchange="this.form.submit()">
+                    <option value="week" {% if selected_filter == 'week' %}selected{% endif %}>Последняя неделя</option>
+                    <option value="month" {% if selected_filter == 'month' %}selected{% endif %}>Последний месяц</option>
+                    <option value="year" {% if selected_filter == 'year' %}selected{% endif %}>Последний год</option>
                 </select>
             </form>
-        </div>
-
-        <form method="post" action="{% url 'faculty_attendance' faculty.id %}" onsubmit="return confirm('Are you sure you want to save changes?');">
-            {% csrf_token %}
+    
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th><i class="fas fa-user me-2"></i>Student</th>
-                            {% for record in attendance_stats.values.0.attendance %}
-                                <th>{{ record.date }}</th>
-                            {% endfor %}
+                            <th><i class="fas fa-user me-2"></i>Студент</th>
+                            <th><i class="fas fa-check me-2"></i>Присутствует</th>
+                            <th><i class="fas fa-clock me-2"></i>Опоздал</th>
+                            <th><i class="fas fa-times me-2"></i>Отсутствует</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for student, stats in attendance_stats.items %}
                             <tr>
                                 <td>{{ student.user.username }}</td>
-                                {% for record in stats.attendance %}
-                                    <td>
-                                        <input type="text" name="attendance_{{ student.id }}_{{ record.date }}" value="{{ record.status }}" class="form-control" readonly>
-                                    </td>
-                                {% endfor %}
+                                <td>{{ stats.present }}</td>
+                                <td>{{ stats.late }}</td>
+                                <td>{{ stats.absent }}</td>
                             </tr>
                         {% empty %}
                             <tr>
-                                <td colspan="5">Нет студентов для отображения.</td>
+                                <td colspan="4">Нет студентов для отображения.</td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-            <button type="submit" class="btn btn-custom mt-3">Save Changes</button>
-        </form>
-    </div>
+        </div>
+    </body>
+    
 
-    <button class="dark-mode-toggle" id="darkModeToggle">
-        <i class="fas fa-moon"></i>
-    </button>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Dark mode toggle
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const body = document.body;
-
-        // Load dark mode state from localStorage
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            body.classList.add('dark-mode');
-            darkModeToggle.querySelector('i').classList.replace('fa-moon', 'fa-sun');
-        }
-
-        darkModeToggle.addEventListener('click', () => {
-            body.classList.toggle('dark-mode');
-            const icon = darkModeToggle.querySelector('i');
-            icon.classList.toggle('fa-moon');
-            icon.classList.toggle('fa-sun');
-            // Save dark mode state
-            localStorage.setItem('darkMode', body.classList.contains('dark-mode') ? 'enabled' : 'disabled');
-        });
-    </script>
-</body>
 </html>
 
 
