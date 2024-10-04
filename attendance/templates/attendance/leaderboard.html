@@ -18,6 +18,7 @@
                 </tr>
             </thead>
             <tbody>
+                <!-- Цикл для отображения студентов -->
                 {% for student in student_leaderboard %}
                 <tr class="hover:bg-gray-50">
                     <td class="border-t py-2 px-4">{{ forloop.counter }}</td>
@@ -30,4 +31,3 @@
     </div>
 </body>
 </html>
-
