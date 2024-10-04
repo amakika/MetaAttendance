@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Home</title>
+    <title>Главная Студента</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body {
@@ -105,47 +105,23 @@
 </head>
 <body>
     <div class="container">
-        <h2>Welcome, {{ user.username }}</h2>
-        <p class="streak">Your attendance streak: <span>{{ attendance_streak }}</span> days</p>
+        <h2>Добро пожаловать, {{ user.username }}</h2>
+        <p class="streak">Ваша серия присутствия: <span>{{ attendance_streak }}</span> дней</p>
         
         <div class="btn-container">
-            <button class="btn" onclick="getLocation()">Mark Attendance</button>
+            <button class="btn" onclick="getLocation()">Кликни на меня, чтобы отметиться</button>
         </div>
 
         <div class="btn-container">
-            <a href="{% url 'leaderboard' %}" class="btn">View Leaderboard</a>
+            <a href="{% url 'leaderboard' %}" class="btn">Рейтинг</a>
         </div>
 
-        <h3>Student Leaderboard</h3>
+        <h3>Присутствие преподавателей</h3>
         <table>
             <thead>
                 <tr>
-                    <th>Rank</th>
-                    <th>Student</th>
-                    <th>Present Days</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for student in student_leaderboard %}
-                <tr>
-                    <td>{{ forloop.counter }}</td>
-                    <td>{{ student.user.username }}</td>
-                    <td>{{ student.present_days }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3" style="text-align: center;">No students available</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <h3>Faculty Attendance</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>Faculty</th>
-                    <th>Present Days</th>
+                    <th>Преподаватель</th>
+                    <th>Дни присутствия</th>
                 </tr>
             </thead>
             <tbody>
@@ -156,7 +132,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="2" style="text-align: center;">No faculty data available</td>
+                    <td colspan="2" style="text-align: center;">Данные о преподавателях недоступны</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -168,7 +144,7 @@
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(sendPosition, showError);
         } else {
-            alert("Geolocation is not supported by this browser.");
+            alert("Геолокация не поддерживается этим браузером.");
         }
     }
 
@@ -186,30 +162,31 @@
         })
         .then(response => response.json())
         .then(data => {
-            alert('Attendance marked: ' + data.attendance_status);
+            alert('Присутствие отмечено: ' + data.attendance_status);
         })
         .catch(error => {
-            console.error('Error:', error);
-            alert('Error marking attendance.');
+            console.error('Ошибка:', error);
+            alert('Ошибка при отметке присутствия.');
         });
     }
 
     function showError(error) {
         switch(error.code) {
             case error.PERMISSION_DENIED:
-                alert("User denied the request for Geolocation.");
+                alert("Пользователь отклонил запрос на геолокацию.");
                 break;
             case error.POSITION_UNAVAILABLE:
-                alert("Location information is unavailable.");
+                alert("Информация о местоположении недоступна.");
                 break;
             case error.TIMEOUT:
-                alert("The request to get user location timed out.");
+                alert("Время ожидания запроса на получение местоположения истекло.");
                 break;
             case error.UNKNOWN_ERROR:
-                alert("An unknown error occurred.");
+                alert("Произошла неизвестная ошибка.");
                 break;
         }
     }
     </script>
 </body>
 </html>
+
