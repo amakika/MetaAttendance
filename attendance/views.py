@@ -17,7 +17,60 @@ import ipaddress
 
 from .models import Student, Teacher, Attendance, Faculty, Profile
 from .forms import UserForm, ProfileForm
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
+from .models import Student, Attendance
+from datetime import datetime, time
+from geopy.distance import geodesic
 
+COLLEGE_LOCATION = (52.5200, 13.4050)  # Replace with your college's coordinates
+
+@csrf_exempt
+def update_location(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+        
+        if request.user.is_authenticated:
+            student = Student.objects.get(user=request.user)
+            student.latitude = latitude
+            student.longitude = longitude
+            student.save()
+            
+            # Calculate distance
+            student_location = (latitude, longitude)
+            distance = geodesic(student_location, COLLEGE_LOCATION).meters
+            
+            # Determine status
+            now = datetime.now().time()
+            if distance <= 150:
+                if now <= time(10, 0):
+                    status = 'present'
+                else:
+                    status = 'late'
+            else:
+                status = 'absent'
+            
+            # Create attendance record
+            Attendance.objects.update_or_create(
+                user=request.user,
+                date=datetime.now().date(),
+                defaults={'status': status}
+            )
+            
+            return JsonResponse({'status': 'success', 'attendance_status': status})
+    
+    return JsonResponse({'status': 'error'}, status=400)
+
+def attendance_view(request):
+    if request.user.is_authenticated:
+        student = Student.objects.get(user=request.user)
+        attendance_records = Attendance.objects.filter(user=request.user).order_by('-date')
+        return render(request, 'attendance.html', {'student': student, 'attendance_records': attendance_records})
+    return JsonResponse({'status': 'error'}, status=401)
 
 
 def all_teachers(request):
@@ -25,11 +78,7 @@ def all_teachers(request):
     return render(request, 'attendance/all_teachers.html', {'teachers': teachers})
 
 # Helper function to calculate distance using geodesic
-def calculate_distance(user_location, college_location):
-    return geodesic(
-        (user_location['lat'], user_location['lng']),
-        (college_location['lat'], college_location['lng'])
-    ).kilometers
+
 
 # Attendance for a specific faculty
 @login_required
@@ -80,35 +129,7 @@ def leaderboard(request):
     return render(request, 'attendance/leaderboard.html', context)
 
 # Mark attendance view
-@login_required
-def mark_attendance(request):
-    if request.method == 'POST':
-        user_ip = request.META.get('REMOTE_ADDR')
-        try:
-            ipaddress.ip_address(user_ip)
-        except ValueError:
-            messages.error(request, 'Invalid IP address.')
-            return redirect('home')
 
-        try:
-            response = requests.get(f'http://ip-api.com/json/{user_ip}').json()
-            if response.get('status') == 'fail':
-                raise ValueError('Failed to get location')
-            user_location = {'lat': response['lat'], 'lng': response['lon']}
-        except (requests.RequestException, ValueError, KeyError) as e:
-            messages.error(request, f'Error getting location: {e}')
-            return redirect('home')
-
-        college_location = {'lat': 42.85747034165005, 'lng': 74.59859944086045}
-        distance = calculate_distance(user_location, college_location)
-        if distance <= 0.1:
-            now = timezone.now()
-            status = 'present' if now.time() < timezone.time(10, 0) else 'late'
-            Attendance.objects.create(user=request.user, status=status)
-            messages.success(request, f'Attendance marked as {status}')
-        else:
-            messages.error(request, 'You are outside the college boundaries.')
-    return redirect('home')
 
 # Home view for students and teachers
 @login_required

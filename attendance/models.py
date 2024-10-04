@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from .subject_models import Subject
 class Faculty(models.Model):
     name = models.CharField(max_length=100)
 
@@ -17,7 +17,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     photo = models.ImageField(upload_to='profile_photos', blank=True)
     bio = models.TextField(blank=True)
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default='Not Specified')
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default='other')
 
     def __str__(self):
         return self.user.username
@@ -25,10 +25,11 @@ class Profile(models.Model):
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='students')
+    latitude = models.FloatField(default=0.0)
+    longitude = models.FloatField(default=0.0)
+    status = models.CharField(max_length=10, choices=[('present', 'Present'), ('absent', 'Absent'), ('late', 'Late')], blank=True)
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE, null=True, blank=True)
-
-    def __str__(self):
-        return self.user.username
+    check_in_time = models.TimeField(null=True, blank=True)
 
     def get_attendance_streak(self):
         attendance_records = Attendance.objects.filter(user=self.user).order_by('-date')
@@ -39,6 +40,10 @@ class Student(models.Model):
             else:
                 break
         return streak
+
+    def get_attendance_duration(self):
+        attendance_records = Attendance.objects.filter(user=self.user).order_by('-date')
+        # Implement duration calculation logic here
 
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -61,4 +66,3 @@ class Attendance(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.date} - {self.status}"
-

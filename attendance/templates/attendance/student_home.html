@@ -109,10 +109,7 @@
         <p class="streak">Your attendance streak: <span>{{ attendance_streak }}</span> days</p>
         
         <div class="btn-container">
-            <form method="post" action="{% url 'mark_attendance' %}">
-                {% csrf_token %}
-                <button type="submit" class="btn">Mark Attendance</button>
-            </form>
+            <button class="btn" onclick="getLocation()">Mark Attendance</button>
         </div>
 
         <div class="btn-container">
@@ -165,5 +162,54 @@
             </tbody>
         </table>
     </div>
+
+    <script>
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(sendPosition, showError);
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    }
+
+    function sendPosition(position) {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        fetch('/update-location/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ latitude: lat, longitude: lon })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Attendance marked: ' + data.attendance_status);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error marking attendance.');
+        });
+    }
+
+    function showError(error) {
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                alert("User denied the request for Geolocation.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                alert("Location information is unavailable.");
+                break;
+            case error.TIMEOUT:
+                alert("The request to get user location timed out.");
+                break;
+            case error.UNKNOWN_ERROR:
+                alert("An unknown error occurred.");
+                break;
+        }
+    }
+    </script>
 </body>
 </html>
