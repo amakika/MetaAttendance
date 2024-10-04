@@ -21,6 +21,7 @@
             height: 30px;
             display: inline-block;
             border-radius: 5px;
+            background-color: white; /* Белый фон по умолчанию */
         }
         .attendance-status-green {
             background-color: #28a745; /* Зеленый для присутствия */
@@ -41,6 +42,14 @@
         .filter-form select {
             padding: 5px;
             border-radius: 5px;
+        }
+        /* Меньшие квадратики для месячного вида */
+        .small-square {
+            width: 20px;
+            height: 20px;
+        }
+        .attendance-count {
+            font-weight: bold;
         }
     </style>
 </head>
@@ -67,29 +76,54 @@
                 <thead class="table-dark">
                     <tr>
                         <th>Имя студента</th>
-                        <th>Понедельник</th>
-                        <th>Вторник</th>
-                        <th>Среда</th>
-                        <th>Четверг</th>
-                        <th>Пятница</th>
-                        <th>Суббота</th>
-                        <th>Воскресенье</th>
+                        {% if selected_filter == 'week' %}
+                            <th>Понедельник</th>
+                            <th>Вторник</th>
+                            <th>Среда</th>
+                            <th>Четверг</th>
+                            <th>Пятница</th>
+                            <th>Суббота</th>
+                            <th>Воскресенье</th>
+                        {% elif selected_filter == 'month' %}
+                            <th colspan="30">Дни месяца</th>
+                        {% elif selected_filter == 'year' %}
+                            <th>Присутствовал</th>
+                            <th>Отсутствовал</th>
+                            <th>Опоздал</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
                     {% for student in attendance_records %}
                         <tr>
                             <td>{{ student.student_name }}</td>
-                            {% for day in student.attendance %}
-                                <td>
-                                    <span class="attendance-square 
-                                        {% if day.status_color == 'green' %}attendance-status-green
-                                        {% elif day.status_color == 'red' %}attendance-status-red
-                                        {% elif day.status_color == 'orange' %}attendance-status-orange
-                                        {% endif %}
-                                    "></span>
-                                </td>
-                            {% endfor %}
+                            {% if selected_filter == 'week' %}
+                                {% for day in student.attendance %}
+                                    <td>
+                                        <span class="attendance-square 
+                                            {% if day.status_color == 'green' %}attendance-status-green
+                                            {% elif day.status_color == 'red' %}attendance-status-red
+                                            {% elif day.status_color == 'orange' %}attendance-status-orange
+                                            {% endif %}
+                                        "></span>
+                                    </td>
+                                {% endfor %}
+                            {% elif selected_filter == 'month' %}
+                                {% for day in student.attendance %}
+                                    <td>
+                                        <span class="attendance-square small-square 
+                                            {% if day.status_color == 'green' %}attendance-status-green
+                                            {% elif day.status_color == 'red' %}attendance-status-red
+                                            {% elif day.status_color == 'orange' %}attendance-status-orange
+                                            {% endif %}
+                                        "></span>
+                                    </td>
+                                {% endfor %}
+                            {% elif selected_filter == 'year' %}
+                                <td class="attendance-count">{{ student.present_count }}</td>
+                                <td class="attendance-count">{{ student.absent_count }}</td>
+                                <td class="attendance-count">{{ student.late_count }}</td>
+                            {% endif %}
                         </tr>
                     {% empty %}
                         <tr>

@@ -21,60 +21,71 @@ COLLEGE_LOCATION = (42.85765909539741, 74.59857798310655)  # Replace with your c
 
 # Faculty attendance view
 @login_required
+@login_required
 def faculty_attendance(request, faculty_id):
     faculty = get_object_or_404(Faculty, id=faculty_id)
     students = Student.objects.filter(faculty=faculty)
     
-    # Get the current day and filter option
+    # Получаем текущую дату и фильтр
     today = timezone.now().date()
-    current_day = today.strftime('%A')  # Example: 'Monday', 'Tuesday'
+    filter_option = request.GET.get('filter', 'week')  # По умолчанию "неделя"
     
-    filter_option = request.GET.get('filter', 'week')  # Default filter is 'week'
-    
-    # Calculate start date based on filter
+    start_date = today
+
     if filter_option == 'week':
-        start_date = today - timedelta(days=today.weekday())  # Start of the week (Monday)
+        start_date = today - timedelta(days=today.weekday())  # Начало недели
+        num_days = 7
     elif filter_option == 'month':
-        start_date = today.replace(day=1)  # Start of the month
+        start_date = today.replace(day=1)  # Начало месяца
+        num_days = (today - start_date).days + 1
     elif filter_option == 'year':
-        start_date = today.replace(month=1, day=1)  # Start of the year
-    else:
-        start_date = today - timedelta(days=7)  # Default to last 7 days if invalid filter
-    
+        start_date = today.replace(month=1, day=1)  # Начало года
+        num_days = 365  # Для года нам нужно просто считать записи
+
     attendance_records = []
-    
-    # Loop through students to get their attendance statuses
+
     for student in students:
-        attendance = Attendance.objects.filter(user=student.user, date__gte=start_date).order_by('-date')
-        weekly_attendance = [{'day': (start_date + timedelta(days=i)).strftime('%A'), 'status_color': 'red'} for i in range(7)]  # Default absent
+        attendance = Attendance.objects.filter(user=student.user, date__gte=start_date).order_by('date')
+        
+        if filter_option == 'year':
+            # Считаем количество присутствий, отсутствий и опозданий
+            present_count = attendance.filter(status='present').count()
+            absent_count = attendance.filter(status='absent').count()
+            late_count = attendance.filter(status='late').count()
+            attendance_records.append({
+                'student_name': student.user.username,
+                'present_count': present_count,
+                'absent_count': absent_count,
+                'late_count': late_count,
+            })
+        else:
+            # Подготовка данных для недели или месяца
+            attendance_days = [{'status_color': 'white'} for _ in range(num_days)]  # Белые квадратики по умолчанию
 
-        for record in attendance:
-            day_index = (record.date - start_date).days
-            if 0 <= day_index < 7:  # Ensure the record is within the week
-                if record.status == 'present':
-                    status_color = 'green'
-                elif record.status == 'late':
-                    status_color = 'orange'
-                else:
-                    status_color = 'red'
-                weekly_attendance[day_index]['status_color'] = status_color
+            for record in attendance:
+                day_index = (record.date - start_date).days
+                if 0 <= day_index < num_days:
+                    if record.status == 'present':
+                        status_color = 'green'
+                    elif record.status == 'late':
+                        status_color = 'orange'
+                    else:
+                        status_color = 'red'
+                    attendance_days[day_index]['status_color'] = status_color
 
-        # Prepare data for the table
-        attendance_records.append({
-            'student_name': student.user.username,
-            'attendance': weekly_attendance
-        })
-    
+            attendance_records.append({
+                'student_name': student.user.username,
+                'attendance': attendance_days,
+            })
+
     context = {
         'faculty': faculty,
         'attendance_records': attendance_records,
         'students': students,
         'selected_filter': filter_option,
-        'current_day': current_day,  # Pass current day to template
     }
-    
-    return render(request, 'attendance/faculty_attendance.html', context)
 
+    return render(request, 'attendance/faculty_attendance.html', context)
 
 # Attendance by hour view
 def attendance_by_hour(request):
