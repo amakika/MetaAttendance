@@ -4,8 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 urlpatterns = [
     path('', views.home, name='home'),
-    path('login/', views.login_view, name='login'),
-    path('logout/', views.logout, name='logout'),
+   
     path('profile/', views.profile, name='profile'),
     path('attendance/', views.attendance_view, name='attendance'),
     path('update-location/', views.update_location, name='update_location'),
@@ -26,4 +25,6 @@ urlpatterns = [
     path('filter-attendance/', views.filter_attendance, name='filter_attendance'),
     path('delete-attendance/<int:attendance_id>/', views.delete_attendance, name='delete_attendance'),
     path('set-language/', views.set_language_view, name='set_language'),
+      path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
