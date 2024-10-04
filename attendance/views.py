@@ -40,7 +40,7 @@ def attendance_by_hour(request):
         attendance_by_hour[hour] += 1  # Increment the count for that hour
     
     # Add your logic for rendering the response
-    return render(request, 'your_template.html', {'attendance_by_hour': attendance_by_hour})
+    return render(request, 'attendance/attendance_by_hour.html', {'attendance_by_hour': attendance_by_hour})
 @csrf_exempt
 def update_location(request):
     if request.method == 'POST':
