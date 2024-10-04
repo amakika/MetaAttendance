@@ -4,30 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Таблица лидеров</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .container {
+            max-width: 800px;
+        }
+        .table-header {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+        .table-row:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        .table-row:hover {
+            background-color: #e2e8f0;
+            transition: background-color 0.3s ease;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="container mx-auto p-4 bg-white rounded shadow-lg">
-        <h2 class="text-3xl font-bold text-center mb-8">Таблица лидеров студентов</h2>
-        <table class="min-w-full bg-white">
-            <thead>
-                <tr class="bg-gray-200">
-                    <th class="py-2 px-4">Ранг</th>
-                    <th class="py-2 px-4">Студент</th>
-                    <th class="py-2 px-4">Количество дней присутствия</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Цикл для отображения студентов -->
-                {% for student in student_leaderboard %}
-                <tr class="hover:bg-gray-50">
-                    <td class="border-t py-2 px-4">{{ forloop.counter }}</td>
-                    <td class="border-t py-2 px-4">{{ student.user.username }}</td>
-                    <td class="border-t py-2 px-4">{{ student.present_days }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <div class="container mx-auto bg-white rounded-lg shadow-xl overflow-hidden">
+        <h2 class="text-3xl font-bold text-center py-6 bg-gradient-to-r from-purple-500 to-indigo-600 text-white">Таблица лидеров студентов</h2>
+        <div class="p-6">
+            <table class="w-full">
+                <thead>
+                    <tr class="table-header text-white">
+                        <th class="py-3 px-4 text-left">Ранг</th>
+                        <th class="py-3 px-4 text-left">Студент</th>
+                        <th class="py-3 px-4 text-left">Количество дней присутствия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Цикл для отображения студентов -->
+                    {% for student in student_leaderboard %}
+                    <tr class="table-row">
+                        <td class="border-t py-3 px-4">{{ forloop.counter }}</td>
+                        <td class="border-t py-3 px-4 font-medium">{{ student.user.username }}</td>
+                        <td class="border-t py-3 px-4">{{ student.present_days }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </body>
 </html>
