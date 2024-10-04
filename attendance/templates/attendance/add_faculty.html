@@ -1,17 +1,17 @@
 {% extends 'attendance/base.html' %}
 
-{% block title %}Add Faculty{% endblock %}
+{% block title %}Добавить Факультет{% endblock %}
 
 {% block content %}
 <div class="add-faculty-container">
-    <h2>Add Faculty</h2>
+    <h2>Добавить Факультет</h2>
     <form method="post" class="faculty-form">
         {% csrf_token %}
         <div class="form-group">
             <input type="text" class="form-control" id="name" name="name" required>
-            <label for="name">Faculty Name</label>
+            <label for="name">Название Факультета</label>
         </div>
-        <button type="submit" class="btn btn-primary">Add Faculty</button>
+        <button type="submit" class="btn btn-primary">Добавить Факультет</button>
     </form>
 </div>
 
