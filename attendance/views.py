@@ -18,6 +18,12 @@ import ipaddress
 from .models import Student, Teacher, Attendance, Faculty, Profile
 from .forms import UserForm, ProfileForm
 
+
+
+def all_teachers(request):
+    teachers = Teacher.objects.all()  # Adjust based on your logic
+    return render(request, 'attendance/all_teachers.html', {'teachers': teachers})
+
 # Helper function to calculate distance using geodesic
 def calculate_distance(user_location, college_location):
     return geodesic(
