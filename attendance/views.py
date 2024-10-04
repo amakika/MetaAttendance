@@ -1,77 +1,42 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .models import Student, Teacher, Attendance, Faculty, Profile
 from django.utils import timezone
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .forms import UserForm, ProfileForm
 from django.db.models import Count, Q
 from django.utils.translation import gettext as _
-from django.views.i18n import set_language
-import requests
-import ipaddress
-from geopy.distance import geodesic
 from django.conf import settings
 from django.contrib import admin
 from django.contrib.admin.filters import SimpleListFilter
-from .models import Student, Attendance
-from django.db.models.functions import TruncHour  # Для группировки по часам
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import Student, Teacher, Attendance, Faculty
-from django.db.models import Count, Q
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.db.models import Count, Q
-from .models import Student, Teacher, Attendance, Faculty
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
-from .models import Student, Teacher, Attendance, Faculty, Profile
-from django.utils import timezone
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
-from django.urls import reverse
-from django.contrib.auth.models import User
-from .forms import UserForm, ProfileForm
-from django.db.models import Count, Q
-from geopy.distance import geodesic
-import requests
-import ipaddress
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .forms import UserForm, ProfileForm
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login
-from django.contrib import messages
-from .models import Student, Teacher, Attendance, Faculty, Profile
-from django.utils import timezone
-from django.urls import reverse
-from django.db.models import Count, Q
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
-from django.conf import settings
 from geopy.distance import geodesic
 import requests
 import ipaddress
 
+from .models import Student, Teacher, Attendance, Faculty, Profile
+from .forms import UserForm, ProfileForm
+
+# Helper function to calculate distance using geodesic
+def calculate_distance(user_location, college_location):
+    return geodesic(
+        (user_location['lat'], user_location['lng']),
+        (college_location['lat'], college_location['lng'])
+    ).kilometers
+
+# Attendance for a specific faculty
 @login_required
 def faculty_attendance(request, faculty_id):
     faculty = get_object_or_404(Faculty, id=faculty_id)
     students = Student.objects.filter(faculty=faculty)
-
     attendance_stats = {}
+
     for student in students:
-        # Здесь предполагается, что у вас есть метод для получения статистики посещаемости
         stats = {
-            'present': student.attendance.filter(status='present').count(),
-            'late': student.attendance.filter(status='late').count(),
-            'absent': student.attendance.filter(status='absent').count(),
+            'present': Attendance.objects.filter(user=student.user, status='present').count(),
+            'late': Attendance.objects.filter(user=student.user, status='late').count(),
+            'absent': Attendance.objects.filter(user=student.user, status='absent').count(),
         }
         attendance_stats[student] = stats
 
@@ -82,8 +47,7 @@ def faculty_attendance(request, faculty_id):
     }
     return render(request, 'attendance/faculty_attendance.html', context)
 
-
-
+# Leaderboard view
 def leaderboard(request):
     student_leaderboard = Student.objects.annotate(
         absent_days=Count('user__attendance', filter=Q(user__attendance__status='absent'))
@@ -108,10 +72,11 @@ def leaderboard(request):
     }
     return render(request, 'attendance/leaderboard.html', context)
 
+# Mark attendance view
 @login_required
 def mark_attendance(request):
     if request.method == 'POST':
-        user_ip = request.META['REMOTE_ADDR']
+        user_ip = request.META.get('REMOTE_ADDR')
         try:
             ipaddress.ip_address(user_ip)
         except ValueError:
@@ -120,7 +85,7 @@ def mark_attendance(request):
 
         try:
             response = requests.get(f'http://ip-api.com/json/{user_ip}').json()
-            if response['status'] == 'fail':
+            if response.get('status') == 'fail':
                 raise ValueError('Failed to get location')
             user_location = {'lat': response['lat'], 'lng': response['lon']}
         except (requests.RequestException, ValueError, KeyError) as e:
@@ -138,11 +103,7 @@ def mark_attendance(request):
             messages.error(request, 'You are outside the college boundaries.')
     return redirect('home')
 
-def calculate_distance(user_location, college_location):
-    return geodesic((user_location['lat'], user_location['lng']), (college_location['lat'], college_location['lng'])).kilometers
-
-
-
+# Home view for students and teachers
 @login_required
 def home(request):
     user = request.user
@@ -191,158 +152,12 @@ def home(request):
     else:
         return render(request, 'attendance/error.html', {'message': 'User type not recognized'})
 
-@login_required
-def all_teachers(request):
-    teachers = Teacher.objects.all()
-    context = {
-        'teachers': teachers,
-    }
-    return render(request, 'attendance/all_teachers.html', context)
-
-# Ensure this is not duplicated in your code
+# Admin dashboard view
 @login_required
 def admin_dashboard(request):
     if not request.user.is_staff:
         return redirect('home')
 
-    teachers = Teacher.objects.all().annotate(
-        total_days=Count('user__attendance', distinct=True),
-        present_days=Count('user__attendance', filter=Q(user__attendance__status='present')),
-        absent_days=Count('user__attendance', filter=Q(user__attendance__status='absent')),
-    )
-
-    faculty_attendance = Faculty.objects.annotate(
-        present_days=Count('students__user__attendance', filter=Q(students__user__attendance__status='present'))
-    ).order_by('-present_days')
-
-    context = {
-        'teachers': teachers,
-        'faculties': Faculty.objects.all(),
-        'faculty_attendance': faculty_attendance,
-    }
-    return render(request, 'attendance/admin_dashboard.html', context)
-
-# Other functions unchanged...
-
-# Профиль студента
-
-
-
-
-@login_required
-def faculty_attendance(request, faculty_id):
-    faculty = get_object_or_404(Faculty, id=faculty_id)
-    students = Student.objects.filter(faculty=faculty)
-    attendance_records = Attendance.objects.filter(user__student__faculty=faculty)
-
-    if request.method == 'POST':
-        for student in students:
-            status = request.POST.get(str(student.id), 'absent')  # 'absent' по умолчанию
-            Attendance.objects.create(user=student.user, status=status)
-            messages.success(request, f'Посещаемость для {student.user.username} отмечена как {status}')
-
-    context = {
-        'faculty': faculty,
-        'students': students,
-        'attendance_records': attendance_records,
-    }
-    return render(request, 'attendance/faculty_attendance.html', context)
-
-# Other views...
-@login_required
-def all_teachers(request):
-    teachers = Teacher.objects.all()
-    context = {
-        'teachers': teachers,
-    }
-    return render(request, 'attendance/all_teachers.html', context)
-
-
-class AttendanceFilter(SimpleListFilter):
-    title = _('Attendance Status')
-    parameter_name = 'status'
-
-    def lookups(self, request, model_admin):
-        return [
-            ('present', _('Present')),
-            ('absent', _('Absent')),
-            ('late', _('Late')),
-        ]
-
-    def queryset(self, request, queryset):
-        if self.value():
-            return queryset.filter(user__attendance__status=self.value())
-        else:
-            return queryset
-
-
-@admin.register(Student)
-class StudentAdmin(admin.ModelAdmin):
-    list_display = ('user', 'faculty', 'present_days')
-    list_filter = ('faculty', AttendanceFilter)
-
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        qs = qs.annotate(
-            present_days=Count('user__attendance', filter=Q(user__attendance__status='present'))
-        )
-        return qs
-
-    def present_days(self, obj):
-        return obj.user.attendance_set.filter(status='present').count()
-    present_days.short_description = _('Present Days')
-
-
-
-
-
-@login_required
-def profile(request):
-    user = request.user
-    profile = user.profile if hasattr(user, 'profile') else None
-
-    if request.method == 'POST':
-        user_form = UserForm(request.POST, instance=user)
-        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
-        
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
-            profile_form.save()
-            messages.success(request, 'Your profile was successfully updated!')
-            return redirect('profile')
-        else:
-            messages.error(request, 'Please correct the errors below.')
-    else:
-        user_form = UserForm(instance=user)
-        profile_form = ProfileForm(instance=profile)
-
-    return render(request, 'attendance/profile.html', {
-        'user_form': user_form,
-        'profile_form': profile_form
-    })
-
-
-def login_view(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('home')
-        else:
-            messages.error(request, 'Invalid username or password')
-    return render(request, 'attendance/login.html')
-
-
-
-
-@login_required
-def admin_dashboard(request):
-    if not request.user.is_staff:
-        return redirect('home')
-
-    # Получение общего количества студентов, преподавателей и факультетов
     total_students = Student.objects.count()
     total_teachers = Teacher.objects.count()
     total_faculties = Faculty.objects.count()
@@ -367,13 +182,330 @@ def admin_dashboard(request):
     }
     return render(request, 'attendance/admin_dashboard.html', context)
 
+# Profile management view
+@login_required
+def profile(request):
+    user = request.user
+    profile = getattr(user, 'profile', None)
 
-# Добавление статистики посещаемости по часам
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=user)
+        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
+
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile was successfully updated!')
+            return redirect('profile')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+    else:
+        user_form = UserForm(instance=user)
+        profile_form = ProfileForm(instance=profile)
+
+    context = {
+        'user_form': user_form,
+        'profile_form': profile_form
+    }
+    return render(request, 'attendance/profile.html', context)
+
+# Login view
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+        else:
+            messages.error(request, 'Invalid username or password')
+    return render(request, 'attendance/login.html')
+
+# Add Student view
+@login_required
+def add_student(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        faculty_id = request.POST.get('faculty')
+
+        if not username or not password or not faculty_id:
+            messages.error(request, 'All fields are required.')
+            return redirect('add_student')
+
+        try:
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'Username already exists.')
+                return redirect('add_student')
+
+            user = User.objects.create_user(username=username, password=password)
+            faculty = get_object_or_404(Faculty, id=faculty_id)
+            Student.objects.create(user=user, faculty=faculty)
+            messages.success(request, 'Student added successfully.')
+            return redirect('admin_dashboard')
+        except Exception as e:
+            messages.error(request, f'Error adding student: {e}')
+            return redirect('add_student')
+
+    faculties = Faculty.objects.all()
+    context = {'faculties': faculties}
+    return render(request, 'attendance/add_student.html', context)
+
+# Edit Student view
+@login_required
+def edit_student(request, student_id):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    student = get_object_or_404(Student, id=student_id)
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        faculty_id = request.POST.get('faculty')
+
+        if not username or not faculty_id:
+            messages.error(request, 'All fields are required.')
+            return redirect('edit_student', student_id=student_id)
+
+        try:
+            user = student.user
+            if user.username != username and User.objects.filter(username=username).exists():
+                messages.error(request, 'Username already exists.')
+                return redirect('edit_student', student_id=student_id)
+
+            user.username = username
+            user.save()
+
+            faculty = get_object_or_404(Faculty, id=faculty_id)
+            student.faculty = faculty
+            student.save()
+
+            messages.success(request, 'Student updated successfully.')
+            return redirect('admin_dashboard')
+        except Exception as e:
+            messages.error(request, f'Error updating student: {e}')
+            return redirect('edit_student', student_id=student_id)
+
+    faculties = Faculty.objects.all()
+    context = {
+        'student': student,
+        'faculties': faculties,
+    }
+    return render(request, 'attendance/edit_student.html', context)
+
+# Delete Student view
+@login_required
+def delete_student(request, student_id):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    student = get_object_or_404(Student, id=student_id)
+
+    if request.method == 'POST':
+        try:
+            user = student.user
+            student.delete()
+            user.delete()
+            messages.success(request, 'Student deleted successfully.')
+            return redirect('admin_dashboard')
+        except Exception as e:
+            messages.error(request, f'Error deleting student: {e}')
+            return redirect('admin_dashboard')
+
+    context = {'student': student}
+    return render(request, 'attendance/delete_student.html', context)
+
+# Add Teacher view
+@login_required
+def add_teacher(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        faculty_id = request.POST.get('faculty')  # Assuming teachers are assigned to a faculty
+
+        if not username or not password:
+            messages.error(request, 'Username and password are required.')
+            return redirect('add_teacher')
+
+        try:
+            if User.objects.filter(username=username).exists():
+                messages.error(request, 'Username already exists.')
+                return redirect('add_teacher')
+
+            user = User.objects.create_user(username=username, password=password)
+            teacher = Teacher.objects.create(user=user)
+
+            if faculty_id:
+                faculty = get_object_or_404(Faculty, id=faculty_id)
+                teacher.faculty = faculty
+                teacher.save()
+
+            messages.success(request, 'Teacher added successfully.')
+            return redirect('admin_dashboard')
+        except Exception as e:
+            messages.error(request, f'Error adding teacher: {e}')
+            return redirect('add_teacher')
+
+    faculties = Faculty.objects.all()
+    context = {'faculties': faculties}
+    return render(request, 'attendance/add_teacher.html', context)
+
+# Edit Teacher view
+@login_required
+def edit_teacher(request, teacher_id):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    teacher = get_object_or_404(Teacher, id=teacher_id)
+
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        faculty_id = request.POST.get('faculty')
+
+        if not username:
+            messages.error(request, 'Username is required.')
+            return redirect('edit_teacher', teacher_id=teacher_id)
+
+        try:
+            user = teacher.user
+            if user.username != username and User.objects.filter(username=username).exists():
+                messages.error(request, 'Username already exists.')
+                return redirect('edit_teacher', teacher_id=teacher_id)
+
+            user.username = username
+            user.save()
+
+            if faculty_id:
+                faculty = get_object_or_404(Faculty, id=faculty_id)
+                teacher.faculty = faculty
+                teacher.save()
+
+            messages.success(request, 'Teacher updated successfully.')
+            return redirect('admin_dashboard')
+        except Exception as e:
+            messages.error(request, f'Error updating teacher: {e}')
+            return redirect('edit_teacher', teacher_id=teacher_id)
+
+    faculties = Faculty.objects.all()
+    context = {
+        'teacher': teacher,
+        'faculties': faculties,
+    }
+    return render(request, 'attendance/edit_teacher.html', context)
+
+# Delete Teacher view
+@login_required
+def delete_teacher(request, teacher_id):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    teacher = get_object_or_404(Teacher, id=teacher_id)
+
+    if request.method == 'POST':
+        try:
+            user = teacher.user
+            teacher.delete()
+            user.delete()
+            messages.success(request, 'Teacher deleted successfully.')
+            return redirect('admin_dashboard')
+        except Exception as e:
+            messages.error(request, f'Error deleting teacher: {e}')
+            return redirect('admin_dashboard')
+
+    context = {'teacher': teacher}
+    return render(request, 'attendance/delete_teacher.html', context)
+
+# Add Faculty view
+@login_required
+def add_faculty(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+
+        if not name:
+            messages.error(request, 'Faculty name is required.')
+            return redirect('add_faculty')
+
+        try:
+            if Faculty.objects.filter(name__iexact=name).exists():
+                messages.error(request, 'Faculty with this name already exists.')
+                return redirect('add_faculty')
+
+            Faculty.objects.create(name=name)
+            messages.success(request, 'Faculty added successfully.')
+            return redirect('admin_dashboard')
+        except Exception as e:
+            messages.error(request, f'Error adding faculty: {e}')
+            return redirect('add_faculty')
+
+    return render(request, 'attendance/add_faculty.html')
+
+# Edit Faculty view
+@login_required
+def edit_faculty(request, faculty_id):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    faculty = get_object_or_404(Faculty, id=faculty_id)
+
+    if request.method == 'POST':
+        name = request.POST.get('name')
+
+        if not name:
+            messages.error(request, 'Faculty name is required.')
+            return redirect('edit_faculty', faculty_id=faculty_id)
+
+        try:
+            if Faculty.objects.filter(name__iexact=name).exclude(id=faculty_id).exists():
+                messages.error(request, 'Another faculty with this name already exists.')
+                return redirect('edit_faculty', faculty_id=faculty_id)
+
+            faculty.name = name
+            faculty.save()
+            messages.success(request, 'Faculty updated successfully.')
+            return redirect('admin_dashboard')
+        except Exception as e:
+            messages.error(request, f'Error updating faculty: {e}')
+            return redirect('edit_faculty', faculty_id=faculty_id)
+
+    context = {'faculty': faculty}
+    return render(request, 'attendance/edit_faculty.html', context)
+
+# Delete Faculty view
+@login_required
+def delete_faculty(request, faculty_id):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    faculty = get_object_or_404(Faculty, id=faculty_id)
+
+    if request.method == 'POST':
+        try:
+            faculty.delete()
+            messages.success(request, 'Faculty deleted successfully.')
+            return redirect('admin_dashboard')
+        except Exception as e:
+            messages.error(request, f'Error deleting faculty: {e}')
+            return redirect('admin_dashboard')
+
+    context = {'faculty': faculty}
+    return render(request, 'attendance/delete_faculty.html', context)
+
+# Attendance by hour view
 @login_required
 def attendance_by_hour(request):
-    """Группировка посещаемости по часам"""
+    """Group attendance by hour"""
     attendance_by_hour = Attendance.objects.annotate(
-        hour=TruncHour('time')
+        hour=timezone.localtime(Attendance.time).hour
     ).values('hour').annotate(count=Count('id')).order_by('hour')
 
     context = {
@@ -381,8 +513,7 @@ def attendance_by_hour(request):
     }
     return render(request, 'attendance/attendance_by_hour.html', context)
 
-
-# Добавление фильтрации по полу и факультету
+# Filter attendance view
 @login_required
 def filter_attendance(request):
     gender = request.GET.get('gender')
@@ -391,7 +522,7 @@ def filter_attendance(request):
     queryset = Attendance.objects.all()
 
     if gender:
-        queryset = queryset.filter(user__student__gender=gender)
+        queryset = queryset.filter(user__student__profile__gender=gender)
 
     if faculty_id:
         queryset = queryset.filter(user__student__faculty_id=faculty_id)
@@ -405,159 +536,7 @@ def filter_attendance(request):
 
     return render(request, 'attendance/filter_attendance.html', context)
 
-
-@login_required
-def add_student(request):
-    if not request.user.is_staff:
-        return redirect('home')
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        faculty_id = request.POST['faculty']
-        try:
-            user = User.objects.create_user(username=username, password=password)
-            faculty = Faculty.objects.get(id=faculty_id)
-            Student.objects.create(user=user, faculty=faculty)
-            messages.success(request, 'Student added successfully.')
-            return redirect('admin_dashboard')
-        except Exception as e:
-            messages.error(request, f'Error adding student: {e}')
-    faculties = Faculty.objects.all()
-    return render(request, 'attendance/add_student.html', {'faculties': faculties})
-
-
-@login_required
-def edit_student(request, student_id):
-    if not request.user.is_staff:
-        return redirect('home')
-    student = Student.objects.get(id=student_id)
-    if request.method == 'POST':
-        student.user.username = request.POST['username']
-        student.user.save()
-        student.faculty = Faculty.objects.get(id=request.POST['faculty'])
-        student.save()
-        messages.success(request, 'Student updated successfully.')
-        return redirect('admin_dashboard')
-    faculties = Faculty.objects.all()
-    return render(request, 'attendance/edit_student.html', {
-        'student': student,
-        'faculties': faculties,
-    })
-
-
-@login_required
-def delete_student(request, student_id):
-    if not request.user.is_staff:
-        return redirect('home')
-    student = Student.objects.get(id=student_id)
-    student.delete()
-    messages.success(request, 'Student deleted successfully.')
-    return redirect('admin_dashboard')
-
-
-@login_required
-def add_teacher(request):
-    if not request.user.is_staff:
-        return redirect('home')
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        try:
-            user = User.objects.create_user(username=username, password=password)
-            Teacher.objects.create(user=user)
-            messages.success(request, 'Teacher added successfully.')
-            return redirect('admin_dashboard')
-        except Exception as e:
-            messages.error(request, f'Error adding teacher: {e}')
-    return render(request, 'attendance/add_teacher.html')
-
-
-@login_required
-def edit_teacher(request, teacher_id):
-    if not request.user.is_staff:
-        return redirect('home')
-    teacher = Teacher.objects.get(id=teacher_id)
-    if request.method == 'POST':
-        teacher.user.username = request.POST['username']
-        teacher.user.save()
-        teacher.faculty = Faculty.objects.get(id=request.POST['faculty'])
-        teacher.save()
-        messages.success(request, 'Teacher updated successfully.')
-        return redirect('admin_dashboard')
-    faculties = Faculty.objects.all()
-    return render(request, 'attendance/edit_teacher.html', {
-        'teacher': teacher,
-        'faculties': faculties
-    })
-
-
-@login_required
-def delete_teacher(request, teacher_id):
-    if not request.user.is_staff:
-        return redirect('home')
-    teacher = Teacher.objects.get(id=teacher_id)
-    teacher.delete()
-    messages.success(request, 'Teacher deleted successfully.')
-    return redirect('admin_dashboard')
-
-
-@login_required
-def add_faculty(request):
-    if not request.user.is_staff:
-        return redirect('home')
-    if request.method == 'POST':
-        name = request.POST['name']
-        try:
-            Faculty.objects.create(name=name)
-            messages.success(request, 'Faculty added successfully.')
-            return redirect('admin_dashboard')
-        except Exception as e:
-            messages.error(request, f'Error adding faculty: {e}')
-    return render(request, 'attendance/add_faculty.html', {})
-
-
-@login_required
-def edit_faculty(request, faculty_id):
-    if not request.user.is_staff:
-        return redirect('home')
-    faculty = Faculty.objects.get(id=faculty_id)
-    if request.method == 'POST':
-        faculty.name = request.POST['name']
-        faculty.save()
-        messages.success(request, 'Faculty updated successfully.')
-        return redirect('admin_dashboard')
-    return render(request, 'attendance/edit_faculty.html', {
-        'faculty': faculty
-    })
-
-
-@login_required
-def delete_faculty(request, faculty_id):
-    if not request.user.is_staff:
-        return redirect('home')
-    faculty = Faculty.objects.get(id=faculty_id)
-    faculty.delete()
-    messages.success(request, 'Faculty deleted successfully.')
-    return redirect('admin_dashboard')
-
-
-@login_required
-def faculty_attendance(request, faculty_id):
-    try:
-        faculty = Faculty.objects.get(id=faculty_id)
-        attendance_records = Attendance.objects.filter(user__student__faculty=faculty)
-
-        context = {
-            'faculty': faculty,
-            'attendance_records': attendance_records
-        }
-        return render(request, 'attendance/faculty_attendance.html', context)
-
-    except Faculty.DoesNotExist:
-        messages.error(request, 'Faculty not found.')
-        return redirect('home')
-
-
+# Delete Attendance record view
 @login_required
 def delete_attendance(request, attendance_id):
     if not request.user.is_staff:
@@ -565,24 +544,27 @@ def delete_attendance(request, attendance_id):
         return redirect('home')
 
     attendance_record = get_object_or_404(Attendance, id=attendance_id)
-    
-    try:
-        attendance_record.delete()
-        messages.success(request, 'Attendance record deleted successfully.')
-    except Exception as e:
-        messages.error(request, f"Error deleting attendance record: {e}")
-    
-    return redirect('admin_dashboard')
 
+    if request.method == 'POST':
+        try:
+            attendance_record.delete()
+            messages.success(request, 'Attendance record deleted successfully.')
+            return redirect('admin_dashboard')
+        except Exception as e:
+            messages.error(request, f"Error deleting attendance record: {e}")
+            return redirect('admin_dashboard')
 
+    context = {'attendance_record': attendance_record}
+    return render(request, 'attendance/delete_attendance.html', context)
 
-
+# Set language view
 @login_required
 def set_language_view(request):
-    next = request.POST.get('next', request.GET.get('next'))
+    next_url = request.POST.get('next', request.GET.get('next', '/'))
     language = request.POST.get('language')
+
     if language:
-        response = HttpResponseRedirect(next)
+        response = HttpResponseRedirect(next_url)
         response.set_cookie(
             key=settings.LANGUAGE_COOKIE_NAME,
             value=language,
@@ -595,4 +577,5 @@ def set_language_view(request):
         )
         request.session[settings.LANGUAGE_SESSION_KEY] = language
         return response
+
     return HttpResponseBadRequest()
