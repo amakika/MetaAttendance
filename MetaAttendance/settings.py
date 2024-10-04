@@ -17,16 +17,16 @@ import os
 import dj_database_url
 import dj_database_url
 
-import dj_database_url
-
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://postgres:CZPKkrpgFndkJhMZSMMweYQNhmAyBquJ@postgres.railway.internal:5432/railway'
-    )
-}
-
-
-# Путь к корню вашего проекта
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',  # Указываем, что будем использовать PostgreSQL
+        'NAME': 'railway',  # Имя базы данных
+        'USER': 'postgres',  # Имя пользователя
+        'PASSWORD': 'CZPKkrpgFndkJhMZSMMweYQNhmAyBquJ',  # Ваш пароль
+        'HOST': 'postgres.railway.internal',  # Внутренний хост на Railway
+        'PORT': '5432',  # Порт по умолчанию
+    }
+} 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # URL для доступа к загруженным медиафайлам
