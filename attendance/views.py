@@ -14,11 +14,8 @@ from geopy.distance import geodesic
 import json
 from datetime import datetime, time, timedelta
 
-from .models import Student, Teacher, Attendance, Faculty, Profile
-from .forms import UserForm, ProfileForm
-
-
-# Helper: College location coordinates
+from .models import *
+from .forms import *
 COLLEGE_LOCATION = (42.85765909539741, 74.59857798310655)  # Replace with your college's coordinates
 
 
@@ -28,44 +25,45 @@ def faculty_attendance(request, faculty_id):
     faculty = get_object_or_404(Faculty, id=faculty_id)
     students = Student.objects.filter(faculty=faculty)
     
-    # Get the current day of the week and attendance filter option
+    # Get the current day and filter option
     today = timezone.now().date()
     current_day = today.strftime('%A')  # Example: 'Monday', 'Tuesday'
     
     filter_option = request.GET.get('filter', 'week')  # Default filter is 'week'
-    start_date = today
-
-    # Adjust the start_date based on the selected filter
+    
+    # Calculate start date based on filter
     if filter_option == 'week':
-        start_date -= timedelta(days=7)
+        start_date = today - timedelta(days=today.weekday())  # Start of the week (Monday)
     elif filter_option == 'month':
-        start_date -= timedelta(days=30)
+        start_date = today.replace(day=1)  # Start of the month
     elif filter_option == 'year':
-        start_date -= timedelta(days=365)
-
+        start_date = today.replace(month=1, day=1)  # Start of the year
+    else:
+        start_date = today - timedelta(days=7)  # Default to last 7 days if invalid filter
+    
     attendance_records = []
     
-    # Loop through the students to get their attendance statuses
+    # Loop through students to get their attendance statuses
     for student in students:
         attendance = Attendance.objects.filter(user=student.user, date__gte=start_date).order_by('-date')
-        
-        # Color coding for attendance status
+        weekly_attendance = [{'day': (start_date + timedelta(days=i)).strftime('%A'), 'status_color': 'red'} for i in range(7)]  # Default absent
+
         for record in attendance:
-            if record.status == 'present':
-                status_color = 'green'
-            elif record.status == 'absent':
-                status_color = 'red'
-            else:
-                status_color = 'orange'  # For 'late' or other statuses
-            
-            # Prepare attendance information for the table
-            attendance_records.append({
-                'student_name': student.user.username,
-                'status': record.status,
-                'status_color': status_color,
-                'date': record.date,
-                'day_of_week': record.date.strftime('%A')  # Day of the week
-            })
+            day_index = (record.date - start_date).days
+            if 0 <= day_index < 7:  # Ensure the record is within the week
+                if record.status == 'present':
+                    status_color = 'green'
+                elif record.status == 'late':
+                    status_color = 'orange'
+                else:
+                    status_color = 'red'
+                weekly_attendance[day_index]['status_color'] = status_color
+
+        # Prepare data for the table
+        attendance_records.append({
+            'student_name': student.user.username,
+            'attendance': weekly_attendance
+        })
     
     context = {
         'faculty': faculty,
@@ -76,7 +74,6 @@ def faculty_attendance(request, faculty_id):
     }
     
     return render(request, 'attendance/faculty_attendance.html', context)
-
 
 
 # Attendance by hour view
@@ -100,36 +97,44 @@ def update_location(request):
         data = json.loads(request.body)
         latitude = data.get('latitude')
         longitude = data.get('longitude')
+        
+        if not latitude or not longitude:
+            return JsonResponse({'status': 'error', 'message': 'Invalid coordinates'}, status=400)
 
         if request.user.is_authenticated:
-            student = Student.objects.get(user=request.user)
-            student.latitude = latitude
-            student.longitude = longitude
-            student.save()
+            try:
+                student = Student.objects.get(user=request.user)
+                student.latitude = latitude
+                student.longitude = longitude
+                student.save()
 
-            # Calculate distance to college
-            student_location = (latitude, longitude)
-            distance = geodesic(student_location, COLLEGE_LOCATION).meters
+                # Calculate distance to college
+                student_location = (latitude, longitude)
+                distance = geodesic(student_location, COLLEGE_LOCATION).meters
 
-            # Determine attendance status based on distance and time
-            now = timezone.now().time()
-            status = 'absent'
-            if distance <= 150:  # Within 150 meters of the college
-                if now <= time(10, 0):  # Before 10 AM
-                    status = 'present'
-                else:
-                    status = 'absent'
+                # Determine attendance status based on distance and time
+                now = timezone.now().time()
+                status = 'absent'
+                if distance <= 150:  # Within 150 meters of the college
+                    if now <= time(10, 0):  # Before 10 AM
+                        status = 'present'
+                    else:
+                        status = 'late'
 
-            # Create or update attendance record for today
-            Attendance.objects.update_or_create(
-                user=request.user,
-                date=timezone.now().date(),
-                defaults={'status': status}
-            )
+                # Create or update attendance record for today
+                Attendance.objects.update_or_create(
+                    user=request.user,
+                    date=timezone.now().date(),
+                    defaults={'status': status}
+                )
 
-            return JsonResponse({'status': 'success', 'attendance_status': status})
-    return JsonResponse({'status': 'error'}, status=400)
-
+                return JsonResponse({'status': 'success', 'attendance_status': status})
+            except Student.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'Student record not found'}, status=400)
+        else:
+            return JsonResponse({'status': 'error', 'message': 'User not authenticated'}, status=403)
+        
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 # Attendance view for a student
 def attendance_view(request):
