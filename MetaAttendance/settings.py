@@ -52,8 +52,16 @@ CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = True
 
 DATABASES = {
-    'default': dj_database_url.config(default='postgres://myuser:mypassword@autorack.proxy.rlwy.net:41006/mydatabase')
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'railway',
+        'USER': 'postgres',
+        'PASSWORD': 'CZPKkrpgFndkJhMZSMMweYQNhmAyBquJ',
+        'HOST': 'postgres.railway.internal',
+        'PORT': '5432',
+    }
 }
+
 # Application definition
 
 INSTALLED_APPS = [
