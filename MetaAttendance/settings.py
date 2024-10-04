@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 from django.utils.translation import gettext_lazy as _
 import os
+import os
+import dj_database_url
+
+
 
 # Путь к корню вашего проекта
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -29,15 +33,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-a1js_6%6y-x9-cqj5pv5)u$(b5m=-1eg2@5!7#d7qyw0-g#d@u'
@@ -54,7 +51,9 @@ ALLOWED_HOSTS = [
 CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = True
 
-
+DATABASES = {
+    'default': dj_database_url.config(default='postgres://myuser:mypassword@autorack.proxy.rlwy.net:41006/mydatabase')
+}
 # Application definition
 
 INSTALLED_APPS = [
