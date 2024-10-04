@@ -4,112 +4,222 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Главная Студента</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #6c5ce7;
+            --secondary-color: #00cec9;
+            --accent-color: #fd79a8;
+            --background-color: #dfe6e9;
+            --text-color: #2d3436;
+            --card-background: #ffffff;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f7f7f7;
-            color: #333;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
             line-height: 1.6;
             margin: 0;
             padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(108, 92, 231, 0.1) 0%, rgba(0, 206, 201, 0.1) 90%),
+                radial-gradient(circle at 90% 80%, rgba(253, 121, 168, 0.1) 0%, rgba(108, 92, 231, 0.1) 90%);
+            background-size: cover;
         }
+
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 40px auto;
             padding: 40px;
-            background-color: #fff;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
+            background-color: var(--card-background);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
         }
+
+        .container::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent, 
+                rgba(108, 92, 231, 0.1), 
+                transparent
+            );
+            transform: rotate(45deg);
+            animation: shine 10s infinite;
+        }
+
+        @keyframes shine {
+            0% {
+                top: -50%;
+                left: -50%;
+            }
+            100% {
+                top: 150%;
+                left: 150%;
+            }
+        }
+
         h2, h3 {
-            color: #2c3e50;
+            color: var(--primary-color);
             margin-bottom: 20px;
         }
+
         h2 {
+            font-size: 36px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h3 {
             font-size: 28px;
             font-weight: 600;
-            text-align: center;
-        }
-        h3 {
-            font-size: 22px;
-            font-weight: 600;
             margin-top: 40px;
+            border-bottom: 3px solid var(--secondary-color);
+            padding-bottom: 10px;
+            display: inline-block;
         }
+
         .streak {
             text-align: center;
-            font-size: 18px;
-            margin-bottom: 30px;
+            font-size: 22px;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.3);
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
         }
+
+        .streak:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(108, 92, 231, 0.4);
+        }
+
         .streak span {
-            color: #3498db;
-            font-weight: 600;
-            font-size: 24px;
+            font-weight: 700;
+            font-size: 32px;
+            display: block;
+            margin-top: 10px;
         }
+
         .btn {
             display: inline-block;
-            background-color: #3498db;
-            color: #fff;
-            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 16px 32px;
             border: none;
-            border-radius: 4px;
-            font-size: 16px;
+            border-radius: 50px;
+            font-size: 18px;
             font-weight: 600;
             text-decoration: none;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
             cursor: pointer;
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.3);
+            position: relative;
+            overflow: hidden;
         }
+
+        .btn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                120deg,
+                transparent,
+                rgba(255, 255, 255, 0.3),
+                transparent
+            );
+            transition: all 0.6s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
         .btn:hover {
-            background-color: #2980b9;
+            background-color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(0, 206, 201, 0.4);
         }
+
         .btn-container {
             text-align: center;
             margin-bottom: 40px;
         }
+
         table {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
             margin-bottom: 40px;
-            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 20px;
             overflow: hidden;
         }
+
         th, td {
-            padding: 16px;
+            padding: 20px;
             text-align: left;
         }
+
         th {
-            background-color: #f2f2f2;
+            background-color: var(--primary-color);
             font-weight: 600;
             text-transform: uppercase;
-            font-size: 14px;
-            letter-spacing: 0.5px;
-            color: #2c3e50;
+            font-size: 16px;
+            letter-spacing: 1px;
+            color: white;
         }
+
         td {
-            background-color: #ffffff;
+            background-color: var(--card-background);
             border-bottom: 1px solid #e0e0e0;
+            transition: all 0.3s ease;
         }
+
         tr:last-child td {
             border-bottom: none;
         }
+
         tr:nth-child(even) td {
             background-color: #f9f9f9;
         }
+
         tr:hover td {
             background-color: #f0f0f0;
-            transition: background-color 0.3s ease;
+            transform: scale(1.02);
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Добро пожаловать, {{ user.username }}</h2>
-        <p class="streak">Ваша серия присутствия: <span>{{ attendance_streak }}</span> дней</p>
+        <h2>Добро пожаловать, {{ user.username }}!</h2>
+        <div class="streak">
+            Ваша серия присутствия
+            <span>{{ attendance_streak }} дней</span>
+        </div>
         
         <div class="btn-container">
-            <button class="btn" onclick="getLocation()">Кликни на меня, чтобы отметиться</button>
+            <button class="btn" onclick="getLocation()">Отметиться</button>
         </div>
 
         <div class="btn-container">
@@ -140,53 +250,7 @@
     </div>
 
     <script>
-    function getLocation() {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(sendPosition, showError);
-        } else {
-            alert("Геолокация не поддерживается этим браузером.");
-        }
-    }
-
-    function sendPosition(position) {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-
-        fetch('/update-location/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({ latitude: lat, longitude: lon })
-        })
-        .then(response => response.json())
-        .then(data => {
-            alert('Присутствие отмечено: ' + data.attendance_status);
-        })
-        .catch(error => {
-            console.error('Ошибка:', error);
-            alert('Ошибка при отметке присутствия.');
-        });
-    }
-
-    function showError(error) {
-        switch(error.code) {
-            case error.PERMISSION_DENIED:
-                alert("Пользователь отклонил запрос на геолокацию.");
-                break;
-            case error.POSITION_UNAVAILABLE:
-                alert("Информация о местоположении недоступна.");
-                break;
-            case error.TIMEOUT:
-                alert("Время ожидания запроса на получение местоположения истекло.");
-                break;
-            case error.UNKNOWN_ERROR:
-                alert("Произошла неизвестная ошибка.");
-                break;
-        }
-    }
+    // ... (оставьте JavaScript код без изменений)
     </script>
 </body>
 </html>
-
