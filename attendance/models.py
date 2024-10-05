@@ -19,12 +19,35 @@ class Profile(models.Model):
     def __str__(self):
         return self.user.username
 
+
+class Teacher(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    faculty = models.ForeignKey(Faculty, on_delete=models.SET_NULL, null=True, blank=True, related_name='teachers')
+    profile = models.OneToOneField(Profile, on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return self.user.username
+
+class Attendance(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    date = models.DateField(auto_now_add=True)
+    time = models.TimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=[
+        ('present', 'Present'),
+        ('late', 'Late'),
+        ('absent', 'Absent')
+    ])
+    duration_hours = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.date} - {self.status}"
+
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='students')
     latitude = models.FloatField(default=0.0)
     longitude = models.FloatField(default=0.0)
-    status = models.CharField(max_length=500, choices=[
+    status = models.CharField(max_length=20, choices=[
         ('present', 'Present'), 
         ('absent', 'Absent'), 
         ('late', 'Late')
@@ -46,24 +69,3 @@ class Student(models.Model):
         # Implement duration calculation logic here
         pass
 
-class Teacher(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    faculty = models.ForeignKey(Faculty, on_delete=models.SET_NULL, null=True, blank=True, related_name='teachers')
-    profile = models.OneToOneField(Profile, on_delete=models.CASCADE, null=True, blank=True)
-
-    def __str__(self):
-        return self.user.username
-
-class Attendance(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    date = models.DateField(auto_now_add=True)
-    time = models.TimeField(auto_now_add=True)
-    status = models.CharField(max_length=500, choices=[
-        ('present', 'Present'),
-        ('late', 'Late'),
-        ('absent', 'Absent')
-    ])
-    duration_hours = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.date} - {self.status}"
