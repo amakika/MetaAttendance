@@ -286,16 +286,20 @@
 
     <div class="stats-container">
         <div class="stat-card">
-            <h4>Общее количество студентов</h4>
-            <p>{{ total_students }}</p>
+            <h4>Студенты присутствуют сегодня</h4>
+            <p>{{ students_present_today }}</p>
         </div>
         <div class="stat-card">
-            <h4>Общее количество учителей</h4>
-            <p>{{ total_teachers }}</p>
+            <h4>Учителя присутствуют сегодня</h4>
+            <p>{{ teachers_present_today }}</p>
         </div>
         <div class="stat-card">
-            <h4>Общее количество факультетов</h4>
-            <p>{{ faculties.count }}</p>
+            <h4>Студенты отсутствуют сегодня</h4>
+            <p>{{ students_absent_today }}</p>
+        </div>
+        <div class="stat-card">
+            <h4>Учителя отсутствуют сегодня</h4>
+            <p>{{ teachers_absent_today }}</p>
         </div>
     </div>
 
@@ -304,6 +308,7 @@
         {% for faculty in faculties %}
             <li class="list-group-item">
                 <a href="{% url 'faculty_attendance' faculty.id %}">{{ faculty.name }}</a>
+                <span style="color: green;">{{ faculty.present_today }}/{{ faculty.total_students }}</span>
             </li>
         {% empty %}
             <li class="list-group-item">Факультеты отсутствуют</li>
@@ -314,10 +319,8 @@
         <a href="{% url 'add_teacher' %}" class="btn btn-primary">Добавить учителя</a>
         <a href="{% url 'add_faculty' %}" class="btn btn-primary">Добавить факультет</a>
         <a href="{% url 'all_teachers' %}" class="btn btn-secondary">Все учителя</a>
-       
         <a href="{% url 'filter_attendance' %}" class="btn btn-secondary">Фильтр посещаемости</a>
     </div>
-</div>
 
 <script>
     function toggleDarkMode() {

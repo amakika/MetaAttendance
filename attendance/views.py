@@ -13,7 +13,7 @@ from django.views.decorators.csrf import csrf_exempt
 from geopy.distance import geodesic
 import json
 from datetime import datetime, time, timedelta
-
+from django.db.models import Count, Q
 from .models import *
 from .forms import *
 COLLEGE_LOCATION = (42.85765909539741, 74.59857798310655)  # Replace with your college's coordinates
@@ -226,6 +226,11 @@ def home(request):
 
 
 # Admin dashboard view
+
+
+
+
+
 @login_required
 def admin_dashboard(request):
     if not request.user.is_staff:
@@ -235,26 +240,35 @@ def admin_dashboard(request):
     total_teachers = Teacher.objects.count()
     total_faculties = Faculty.objects.count()
 
-    teachers = Teacher.objects.all().annotate(
-        total_days=Count('user__attendance', distinct=True),
-        present_days=Count('user__attendance', filter=Q(user__attendance__status='present')),
-        absent_days=Count('user__attendance', filter=Q(user__attendance__status='absent')),
-    )
+    today = timezone.now().date()
 
-    faculty_attendance = Faculty.objects.annotate(
-        present_days=Count('students__user__attendance', filter=Q(students__user__attendance__status='present'))
-    ).order_by('-present_days')
+    students_present_today = Attendance.objects.filter(
+        date=today, status='present', user__student__isnull=False
+    ).count()
+
+    teachers_present_today = Attendance.objects.filter(
+        date=today, status='present', user__teacher__isnull=False
+    ).count()
+
+    students_absent_today = total_students - students_present_today
+    teachers_absent_today = total_teachers - teachers_present_today
+
+    faculties = Faculty.objects.annotate(
+        present_today=Count('students__user__attendance', filter=Q(students__user__attendance__date=today, students__user__attendance__status='present')),
+        total_students=Count('students')
+    )
 
     context = {
         'total_students': total_students,
         'total_teachers': total_teachers,
         'total_faculties': total_faculties,
-        'teachers': teachers,
-        'faculties': Faculty.objects.all(),
-        'faculty_attendance': faculty_attendance,
+        'students_present_today': students_present_today,
+        'teachers_present_today': teachers_present_today,
+        'students_absent_today': students_absent_today,
+        'teachers_absent_today': teachers_absent_today,
+        'faculties': faculties,
     }
     return render(request, 'attendance/admin_dashboard.html', context)
-
 
 # Profile management view
 @login_required
