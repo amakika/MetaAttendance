@@ -3,22 +3,18 @@ from django.contrib.auth.models import User
 from .subject_models import Subject
 
 class Faculty(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=200)
 
     def __str__(self):
         return self.name
 
 class Profile(models.Model):
-    GENDER_CHOICES = [
-        ('male', 'Male'),
-        ('female', 'Female'),
-        ('other', 'Other'),
-    ]
+  
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    photo = models.ImageField(upload_to='profile_photos', blank=True)
+    photo = models.ImageField(blank=True, upload_to='profile_photos')
     bio = models.TextField(blank=True)
-    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, default='other')
+   
 
     def __str__(self):
         return self.user.username
@@ -28,8 +24,7 @@ class Student(models.Model):
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='students')
     latitude = models.FloatField(default=0.0)
     longitude = models.FloatField(default=0.0)
-    # Updated max_length to 20 to accommodate longer statuses if needed
-    status = models.CharField(max_length=20, choices=[
+    status = models.CharField(max_length=500, choices=[
         ('present', 'Present'), 
         ('absent', 'Absent'), 
         ('late', 'Late')
@@ -48,8 +43,8 @@ class Student(models.Model):
         return streak
 
     def get_attendance_duration(self):
-        attendance_records = Attendance.objects.filter(user=self.user).order_by('-date')
         # Implement duration calculation logic here
+        pass
 
 class Teacher(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -63,8 +58,7 @@ class Attendance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)
     time = models.TimeField(auto_now_add=True)
-    # This field can accommodate longer statuses
-    status = models.CharField(max_length=20, choices=[
+    status = models.CharField(max_length=500, choices=[
         ('present', 'Present'),
         ('late', 'Late'),
         ('absent', 'Absent')
