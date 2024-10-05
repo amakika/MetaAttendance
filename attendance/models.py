@@ -68,4 +68,3 @@ class Student(models.Model):
     def get_attendance_duration(self):
         # Implement duration calculation logic here
         pass
-
