@@ -212,7 +212,7 @@
 </head>
 <body>
     <div class="container">
-        <h2>Добро пожаловать, {{ user.username }}!</h2>
+        <h2>Добро пожаловать, {{ user.first_name }}!</h2>
         <div class="streak">
             Ваша серия присутствия
             <span>{{ attendance_streak }} дней</span>
@@ -230,7 +230,7 @@
         <table>
             <thead>
                 <tr>
-                    <th>Преподаватель</th>
+                    <th>Студент</th>
                     <th>Дни присутствия</th>
                 </tr>
             </thead>
