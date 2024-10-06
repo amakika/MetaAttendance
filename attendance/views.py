@@ -191,8 +191,7 @@ def home(request):
 
         context = {
             'attendance_streak': attendance_streak,
-            'male_students': male_students,
-            'female_students': female_students,
+           
             'faculty_attendance': faculty_attendance,
         }
         return render(request, 'attendance/student_home.html', context)
