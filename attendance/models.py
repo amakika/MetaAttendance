@@ -37,11 +37,9 @@ class Attendance(models.Model):
         ('late', 'Late'),
         ('absent', 'Absent')
     ])
-    duration_hours = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
-
+    
     def __str__(self):
         return f"{self.user.username} - {self.date} - {self.status}"
-
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='students')
@@ -65,6 +63,4 @@ class Student(models.Model):
                 break
         return streak
 
-    def get_attendance_duration(self):
-        # Implement duration calculation logic here
-        pass
+   
