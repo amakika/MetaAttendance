@@ -183,13 +183,7 @@ def home(request):
     if hasattr(user, 'student'):
         attendance_streak = user.student.get_attendance_streak()
 
-        male_students = Student.objects.filter(profile__gender='male').annotate(
-            present_days=Count('user__attendance', filter=Q(user__attendance__status='present'))
-        ).order_by('-present_days')
-
-        female_students = Student.objects.filter(profile__gender='female').annotate(
-            present_days=Count('user__attendance', filter=Q(user__attendance__status='present'))
-        ).order_by('-present_days')
+       
 
         faculty_attendance = Faculty.objects.annotate(
             present_days=Count('students__user__attendance', filter=Q(students__user__attendance__status='present'))
