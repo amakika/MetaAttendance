@@ -43,7 +43,7 @@
                     {% for student in student_leaderboard %}
                     <tr class="table-row">
                         <td class="border-t py-3 px-4">{{ forloop.counter }}</td>
-                        <td class="border-t py-3 px-4 font-medium">{{ user.username}}</td>
+                        <td class="border-t py-3 px-4 font-medium">{{  student.user.username}}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
