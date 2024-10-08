@@ -21,6 +21,9 @@ class Profile(models.Model):
 
 
 class Teacher(models.Model):
+    
+    first_name = models.CharField(max_length=200, default="Unknown")
+    last_name = models.CharField(max_length=200,default="Unknown")
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     faculty = models.ForeignKey(Faculty, on_delete=models.SET_NULL, null=True, blank=True, related_name='teachers')
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE, null=True, blank=True)
@@ -32,6 +35,7 @@ class Attendance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     date = models.DateField(auto_now_add=True)
     time = models.TimeField(auto_now_add=True)
+    duration_hours = models.FloatField(null=True, blank=True)
     status = models.CharField(max_length=20, choices=[
         ('present', 'Present'),
         ('late', 'Late'),
@@ -41,10 +45,12 @@ class Attendance(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.date} - {self.status}"
 class Student(models.Model):
+    first_name = models.CharField(max_length=200, default = "Unknown")
+    last_name=models.CharField(max_length=200,default="Unknown")
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='students')
-    latitude = models.FloatField(default=0.0)
-    longitude = models.FloatField(default=0.0)
+    latitude = models.FloatField(default=0.0,null=True, blank=True)
+    longitude = models.FloatField(default=0.0,null=True, blank=True)
     status = models.CharField(max_length=20, choices=[
         ('present', 'Present'), 
         ('absent', 'Absent'), 

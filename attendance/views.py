@@ -20,7 +20,7 @@ COLLEGE_LOCATION = (42.85765909539741, 74.59857798310655)  # Replace with your c
 
 
 # Faculty attendance view
-@login_required
+
 @login_required
 def faculty_attendance(request, faculty_id):
     faculty = get_object_or_404(Faculty, id=faculty_id)
