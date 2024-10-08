@@ -4,66 +4,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Таблица лидеров</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-color: #1cb0f6;
+            --secondary-color: #ddf4ff;
+            --text-color: #3c3c3c;
+            --background-color: #fff;
+        }
         body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
         .container {
-            max-width: 800px;
+            background-color: var(--background-color);
+            border-radius: 16px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            max-width: 500px;
+            width: 100%;
         }
-        .table-header {
-            background: linear-gradient(90deg, #4c51bf 0%, #6b46c1 100%);
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: var(--primary-color);
         }
-        .table-row:nth-child(even) {
-            background-color: #f8fafc;
+        .leaderboard {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
         }
-        .table-row:hover {
-            background-color: #e2e8f0;
-            transform: scale(1.02);
-            transition: all 0.3s ease;
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--secondary-color);
         }
         .rank {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #4c51bf;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            width: 40px;
+            text-align: center;
         }
         .student-name {
+            flex-grow: 1;
             font-weight: 600;
-            color: #2d3748;
+            margin-left: 12px;
         }
         .days-present {
-            font-weight: 600;
-            color: #4c51bf;
+            font-weight: 700;
+            color: var(--primary-color);
+            background-color: var(--secondary-color);
+            padding: 6px 12px;
+            border-radius: 20px;
         }
     </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-4">
-    <div class="container mx-auto bg-white rounded-lg shadow-2xl overflow-hidden">
-        <h2 class="text-3xl font-bold text-center py-8 bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">Таблица лидеров студентов</h2>
-        <div class="p-6">
-            <table class="w-full">
-                <thead>
-                    <tr class="table-header text-white text-lg">
-                        <th class="py-4 px-6 text-left">Ранг</th>
-                        <th class="py-4 px-6 text-left">Студент</th>
-                        <th class="py-4 px-6 text-left">Дней присутствия</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <!-- Цикл для отображения студентов -->
-                    {% for student in student_leaderboard %}
-                    <tr class="table-row">
-                        <td class="border-t py-4 px-6"><span class="rank">{{ forloop.counter }}</span></td>
-                        <td class="border-t py-4 px-6"><span class="student-name">{{ student.user.username }}</span></td>
-                        <td class="border-t py-4 px-6"><span class="days-present">{{ student.present_days }}</span></td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+<body>
+    <div class="container">
+        <h2>Таблица лидеров</h2>
+        <ul class="leaderboard">
+            {% for student in student_leaderboard %}
+            <li class="leaderboard-item">
+                <span class="rank">{{ forloop.counter }}</span>
+                <span class="student-name">{{ student.user.username }}</span>
+                <span class="days-present">{{ student.present_days }}</span>
+            </li>
+            {% endfor %}
+        </ul>
     </div>
 </body>
 </html>
