@@ -160,6 +160,9 @@ def attendance_view(request):
 def all_teachers(request):
     teachers = Teacher.objects.all()
     return render(request, 'attendance/all_teachers.html', {'teachers': teachers})
+def all_students(request):
+    students = Student.objects.all()
+    return render(request, 'attendance/all_students.html', {'students': students})
 
 
 # Leaderboard view

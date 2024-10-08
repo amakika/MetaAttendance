@@ -34,5 +34,6 @@ urlpatterns = [
      path('leaderboard/', leaderboard, name='leaderboard'),
      path('update-location/', views.update_location, name='update_location'),
     path('attendance/', views.attendance_view, name='attendance_view'),
+    path('all-students/', views.all_students, name='all_students'),
  
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,7 +1,7 @@
 {% extends 'attendance/base.html' %}
 {% load i18n %}
 {% block content %}
-    <h1>{% trans "All Teachers" %}</h1>
+    <h1>{% trans "Все студента" %}</h1>
     <ul>
         {% for teacher in teachers %}
             <li>{{ teacher.user.username }} ({{ teacher.faculty.name }})</li>
