@@ -180,9 +180,7 @@ class Command(BaseCommand):
                 base_username = base_username[:150]
 
                 # Генерация уникального username
-                username = self.generate_unique_username(base_username)
-
-                try:
+                username = base_username
                     # Создаем пользователя
                     user = User.objects.create_user(
                         username=username,

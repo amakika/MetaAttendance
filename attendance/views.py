@@ -127,7 +127,7 @@ def update_location(request):
                 now = timezone.now().time()
                 status = 'absent'
                 if distance <= 150:  # Within 150 meters of the college
-                    if now <= time(10, 0):  # Before 10 AM
+                    if now <= time(10, 15):  # Before 10 AM
                         status = 'present'
                     else:
                         status = 'late'

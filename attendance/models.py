@@ -9,10 +9,8 @@ class Faculty(models.Model):
         return self.name
 
 class Profile(models.Model):
-  
-
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    photo = models.ImageField(blank=True, upload_to='profile_photos')
+   
     bio = models.TextField(blank=True)
    
 
