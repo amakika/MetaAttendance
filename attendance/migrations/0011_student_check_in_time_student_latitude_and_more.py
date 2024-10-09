@@ -28,11 +28,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='status',
-            field=models.CharField(blank=True, choices=[('present', 'Present'), ('absent', 'Absent'), ('late', 'Late')], max_length=10),
+            field=models.CharField(blank=True, choices=[('present', 'Present'), ('absent', 'Absent'), ('late', 'Late')], max_length=20),
         ),
         migrations.AlterField(
             model_name='profile',
             name='gender',
-            field=models.CharField(choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')], default='other', max_length=10),
+            field=models.CharField(choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')], default='other', max_length=20),
         ),
     ]

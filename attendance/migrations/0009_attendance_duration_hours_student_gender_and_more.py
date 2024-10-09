@@ -18,11 +18,11 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='student',
             name='gender',
-            field=models.CharField(choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')], default='Not Specified', max_length=10),
+            field=models.CharField(choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')], default='Not Specified', max_length=20),
         ),
         migrations.AddField(
             model_name='teacher',
             name='gender',
-            field=models.CharField(choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')], default='Not Specified', max_length=10),
+            field=models.CharField(choices=[('male', 'Male'), ('female', 'Female'), ('other', 'Other')], default='Not Specified', max_length=20),
         ),
     ]

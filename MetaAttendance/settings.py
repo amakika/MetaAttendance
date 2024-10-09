@@ -106,7 +106,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://postgres:CZPKkrpgFndkJhMZSMMweYQNhmAyBquJ@autorack.proxy.rlwy.net:41006/railway'
+        default='postgresql://postgres:EgQNxysNxJGGWRfaJBlXJqJkNXSnwoKO@autorack.proxy.rlwy.net:54798/railway'
     )
 }
 
