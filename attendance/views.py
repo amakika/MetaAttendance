@@ -214,16 +214,20 @@ def home(request):
         return render(request, 'attendance/teacher_home.html', context)
 
     elif hasattr(user, 'parent'):
-        # Перенаправляем на домашнюю страницу родителя
-        return redirect('parent_home')
+        student = user.parent.student
+        attendance_records = Attendance.objects.filter(user=student.user).order_by('-date')
+
+        context = {
+            'student': student,
+            'attendance_records': attendance_records,
+        }
+        return render(request, 'attendance/parent_home.html', context)
 
     elif user.is_staff:
-        return redirect('admin_dashboard')
+        return render(request, 'attendance/admin_dashboard.html')
 
     else:
         return render(request, 'attendance/error.html', {'message': 'User type not recognized'})
-
-
 # Admin dashboard view
 
 
