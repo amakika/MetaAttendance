@@ -77,8 +77,7 @@ class Student(models.Model):
         for record in attendance_records:
             if record.status == 'present':
                 streak += 1
-            elif record.status == 'absent':
-                streak = 0
+            
             else:
                 break
         return streak
