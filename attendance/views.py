@@ -18,22 +18,7 @@ from .models import *
 from .forms import *
 COLLEGE_LOCATION = (42.85765909539741, 74.59857798310655)  # Replace with your college's coordinates
 # Parent home view
-@login_required
-def parent_home(request):
-    user = request.user
 
-    if hasattr(user, 'parent'):
-        student = user.parent.student
-        attendance_records = Attendance.objects.filter(user=student.user).order_by('-date')
-
-        context = {
-            'student': student,
-            'attendance_records': attendance_records,
-        }
-        return render(request, 'attendance/parent_home.html', context)
-
-    else:
-        return render(request, 'attendance/error.html', {'message': 'User is not a parent'})
 
 # Faculty attendance view
 
