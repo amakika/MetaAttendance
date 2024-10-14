@@ -77,7 +77,7 @@
             {% for student in student_leaderboard %}
             <li class="leaderboard-item">
                 <span class="rank">{{ forloop.counter }}</span>
-                <span class="student-name">{{ student.user.username }}</span>
+                <span class="student-name">{{ student.user.last_name }} {{ student.user.first_name}}</span>
                 <span class="days-present">{{ student.present_days }}</span>
             </li>
             {% endfor %}
