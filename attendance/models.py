@@ -5,25 +5,32 @@ from .subject_models import Subject
 class Faculty(models.Model):
     name = models.CharField(max_length=300)
 
+    class Meta:
+        ordering = ['name']
+        verbose_name_plural = 'Faculties'
+
     def __str__(self):
         return self.name
 
-class Profile(models.Model):
-  
-
+class Parent(models.Model):
+    student = models.ForeignKey('Student', on_delete=models.CASCADE)
+    name = models.CharField(max_length=300)  # Fixed typo here
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    photo = models.ImageField(blank=True, upload_to='profile_photos')
-    bio = models.TextField(blank=True)
-   
 
     def __str__(self):
         return self.user.username
 
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    photo = models.ImageField(blank=True, upload_to='profile_photos')
+    bio = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.user.username
 
 class Teacher(models.Model):
-    
     first_name = models.CharField(max_length=300, default="Unknown")
-    last_name = models.CharField(max_length=300,default="Unknown")
+    last_name = models.CharField(max_length=300, default="Unknown")
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     faculty = models.ForeignKey(Faculty, on_delete=models.SET_NULL, null=True, blank=True, related_name='teachers')
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE, null=True, blank=True)
@@ -41,16 +48,21 @@ class Attendance(models.Model):
         ('late', 'Late'),
         ('absent', 'Absent')
     ])
-    
+
+    class Meta:
+        ordering = ['-date']
+        verbose_name_plural = 'Attendances'
+
     def __str__(self):
         return f"{self.user.username} - {self.date} - {self.status}"
+
 class Student(models.Model):
-    first_name = models.CharField(max_length=300, default = "Unknown")
-    last_name=models.CharField(max_length=300,default="Unknown")
+    first_name = models.CharField(max_length=300, default="Unknown")
+    last_name = models.CharField(max_length=300, default="Unknown")
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE, related_name='students')
-    latitude = models.FloatField(default=0.0,null=True, blank=True)
-    longitude = models.FloatField(default=0.0,null=True, blank=True)
+    latitude = models.FloatField(default=0.0, null=True, blank=True)
+    longitude = models.FloatField(default=0.0, null=True, blank=True)
     status = models.CharField(max_length=30, choices=[
         ('present', 'Present'), 
         ('absent', 'Absent'), 
@@ -65,8 +77,11 @@ class Student(models.Model):
         for record in attendance_records:
             if record.status == 'present':
                 streak += 1
+            elif record.status == 'absent':
+                streak = 0
             else:
                 break
         return streak
 
-   
+    def __str__(self):
+        return f"{self.first_name} {self.last_name}"

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Welcome, {{ user.username }}</h1>
+<h2>Attendance Records for {{ student.first_name }} {{ student.last_name }}</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for record in attendance_records %}
+        <tr>
+            <td>{{ record.date }}</td>
+            <td>{{ record.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2>Location of {{ student.first_name }} {{ student.last_name }}</h2>
+<div id="map" style="height: 400px; width: 100%;"></div>
+
+<!-- Подключение Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var map = L.map('map').setView([{{ student.latitude }}, {{ student.longitude }}], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        var marker = L.marker([{{ student.latitude }}, {{ student.longitude }}]).addTo(map)
+            .bindPopup('<b>{{ student.first_name }} {{ student.last_name }}</b><br>Current Location.').openPopup();
+    });
+</script>
+{% endblock %}

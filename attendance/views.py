@@ -17,7 +17,23 @@ from django.db.models import Count, Q
 from .models import *
 from .forms import *
 COLLEGE_LOCATION = (42.85765909539741, 74.59857798310655)  # Replace with your college's coordinates
+# Parent home view
+@login_required
+def parent_home(request):
+    user = request.user
 
+    if hasattr(user, 'parent'):
+        student = user.parent.student
+        attendance_records = Attendance.objects.filter(user=student.user).order_by('-date')
+
+        context = {
+            'student': student,
+            'attendance_records': attendance_records,
+        }
+        return render(request, 'attendance/parent_home.html', context)
+
+    else:
+        return render(request, 'attendance/error.html', {'message': 'User is not a parent'})
 
 # Faculty attendance view
 
@@ -178,7 +194,8 @@ def leaderboard(request):
     }
     return render(request, 'attendance/leaderboard.html', context)
 
-# Home view for students and teachers
+
+
 @login_required
 def home(request):
     user = request.user
@@ -186,15 +203,12 @@ def home(request):
     if hasattr(user, 'student'):
         attendance_streak = user.student.get_attendance_streak()
 
-       
-
         faculty_attendance = Faculty.objects.annotate(
             present_days=Count('students__user__attendance', filter=Q(students__user__attendance__status='present'))
         ).order_by('-present_days')
 
         context = {
             'attendance_streak': attendance_streak,
-           
             'faculty_attendance': faculty_attendance,
         }
         return render(request, 'attendance/student_home.html', context)
@@ -213,6 +227,10 @@ def home(request):
             'faculty_attendance': faculty_attendance,
         }
         return render(request, 'attendance/teacher_home.html', context)
+
+    elif hasattr(user, 'parent'):
+        # Перенаправляем на домашнюю страницу родителя
+        return redirect('parent_home')
 
     elif user.is_staff:
         return redirect('admin_dashboard')
