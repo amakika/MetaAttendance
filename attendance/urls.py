@@ -35,6 +35,6 @@ urlpatterns = [
      path('update-location/', views.update_location, name='update_location'),
     path('attendance/', views.attendance_view, name='attendance_view'),
     path('all-students/', views.all_students, name='all_students'),
-    path('parent_home/', views.parent_home, name='parent_home'),
+    
  
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
