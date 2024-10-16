@@ -447,6 +447,23 @@ def add_teacher(request):
     context = {'faculties': faculties}
     return render(request, 'attendance/add_teacher.html', context)
 
+# Admin Dashboard view
+@login_required
+def admin_dashboard(request):
+    if not request.user.is_staff:
+        return redirect('home')
+
+    students = Student.objects.all()
+    teachers = Teacher.objects.all()
+    faculties = Faculty.objects.all()
+
+    context = {
+        'students': students,
+        'teachers': teachers,
+        'faculties': faculties,
+    }
+    return render(request, 'attendance/admin_dashboard.html', context)
+
 # Edit Teacher view
 @login_required
 def edit_teacher(request, teacher_id):
@@ -659,3 +676,60 @@ def set_language_view(request):
         return response
 
     return HttpResponseBadRequest()
+
+from django.http import HttpResponse
+from openpyxl import Workbook, load_workbook
+from django.contrib.auth.decorators import permission_required
+import io
+
+@login_required
+@permission_required('attendance.can_export_attendance', raise_exception=True)
+def export_attendance_to_excel(request):
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Attendance Data"
+
+    # Add headers
+    headers = ['User', 'Date', 'Status']
+    for col, header in enumerate(headers, start=1):
+        ws.cell(row=1, column=col, value=header)
+
+    # Add data
+    attendances = Attendance.objects.all().order_by('user', 'date')
+    for row, attendance in enumerate(attendances, start=2):
+        ws.cell(row=row, column=1, value=str(attendance.user))
+        ws.cell(row=row, column=2, value=attendance.date.strftime('%Y-%m-%d'))
+        ws.cell(row=row, column=3, value=attendance.status)
+
+    # Create response
+    response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=attendance_data.xlsx'
+
+    # Save the workbook to the response
+    wb.save(response)
+
+    return response
+
+@login_required
+@permission_required('attendance.can_import_attendance', raise_exception=True)
+def import_attendance_from_excel(request):
+    if request.method == 'POST' and request.FILES['excel_file']:
+        excel_file = request.FILES['excel_file']
+        wb = load_workbook(filename=io.BytesIO(excel_file.read()))
+        ws = wb.active
+
+        for row in ws.iter_rows(min_row=2, values_only=True):
+            username, date_str, status = row
+            user = User.objects.get(username=username)
+            date = datetime.strptime(date_str, '%Y-%m-%d').date()
+
+            Attendance.objects.update_or_create(
+                user=user,
+                date=date,
+                defaults={'status': status}
+            )
+
+        messages.success(request, 'Attendance data imported successfully.')
+        return redirect('admin_dashboard')
+
+    return render(request, 'attendance/import_attendance.html')
