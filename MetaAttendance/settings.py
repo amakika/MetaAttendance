@@ -105,9 +105,14 @@ CSRF_TRUSTED_ORIGINS = [
 
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://postgres:vACypthAJhHNQpMzCCfnLSajnwxGbJij@autorack.proxy.rlwy.net:18116/railway'
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'railway',  # Имя базы данных
+        'USER': 'postgres',  # Пользователь базы данных
+        'PASSWORD': 'vACypthAJhHNQpMzCCfnLSajnwxGbJij',  # Пароль базы данных
+        'HOST': 'postgres.railway.internal',  # Хост базы данных
+        'PORT': '5432',  # Порт базы данных
+    }
 }
 
 
