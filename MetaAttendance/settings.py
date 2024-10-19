@@ -42,7 +42,7 @@ DEBUG = False
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    'metaattendance-production.up.railway.app',
+    'web-production-d693a.up.railway.app',
     # Add any other domains you need
 ]
 CSRF_COOKIE_SECURE = True
@@ -106,7 +106,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='postgresql://postgres:EgQNxysNxJGGWRfaJBlXJqJkNXSnwoKO@autorack.proxy.rlwy.net:54798/railway'
+        default='postgresql://postgres:vACypthAJhHNQpMzCCfnLSajnwxGbJij@autorack.proxy.rlwy.net:18116/railway'
     )
 }
 
